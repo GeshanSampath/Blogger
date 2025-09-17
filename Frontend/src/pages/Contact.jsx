@@ -1,7 +1,28 @@
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
+import axios from "axios";
+import { useState } from "react";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Contact() {
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [status, setStatus] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("Sending...");
+
+    try {
+      await axios.post(`${API}/contact`, form);
+      setStatus("✅ Message sent successfully!");
+      setForm({ name: "", email: "", message: "" });
+    } catch (err) {
+      console.error(err);
+      setStatus("❌ Failed to send message. Try again later.");
+    }
+  }
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-[#0f3460] via-[#16213e] to-[#1a1a2e] text-white py-20 px-6 overflow-hidden">
       {/* Background glow effects */}
@@ -52,6 +73,7 @@ export default function Contact() {
 
         {/* Right Side - Contact Form */}
         <motion.form
+          onSubmit={handleSubmit}
           initial={{ x: 50, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -65,18 +87,24 @@ export default function Contact() {
             type="text"
             placeholder="Your Name"
             required
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="w-full px-4 py-3 rounded-lg border border-gray-300/30 bg-white/5 text-white focus:ring-2 focus:ring-[#00adb5] outline-none"
           />
           <input
             type="email"
             placeholder="Your Email"
             required
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full px-4 py-3 rounded-lg border border-gray-300/30 bg-white/5 text-white focus:ring-2 focus:ring-[#00adb5] outline-none"
           />
           <textarea
             rows="5"
             placeholder="Your Message"
             required
+            value={form.message}
+            onChange={(e) => setForm({ ...form, message: e.target.value })}
             className="w-full px-4 py-3 rounded-lg border border-gray-300/30 bg-white/5 text-white focus:ring-2 focus:ring-[#00adb5] outline-none"
           ></textarea>
           <motion.button
@@ -87,6 +115,9 @@ export default function Contact() {
           >
             Send Message
           </motion.button>
+          {status && (
+            <p className="text-center mt-4 text-sm text-gray-300">{status}</p>
+          )}
         </motion.form>
       </div>
     </section>

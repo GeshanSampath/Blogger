@@ -1,169 +1,255 @@
+// src/pages/Blogs.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import Confetti from "react-confetti";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+// Typewriter effect for titles
+const TypewriterTitle = ({ text }) => {
+  const [displayed, setDisplayed] = useState("");
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setDisplayed(text.slice(0, i + 1));
+      i++;
+      if (i === text.length) clearInterval(interval);
+    }, 80);
+    return () => clearInterval(interval);
+  }, [text]);
+  return <span>{displayed}</span>;
+};
+
 export default function Blogs() {
   const [blogs, setBlogs] = useState([]);
-  const [form, setForm] = useState({ title: "", content: "", author: "" });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [form, setForm] = useState({ title: "", author: "", content: "" });
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    fetchAll();
+    fetchBlogs();
   }, []);
 
-  async function fetchAll() {
-    setLoading(true);
-    setError(null);
+  const fetchBlogs = async () => {
     try {
       const res = await axios.get(`${API}/blogs`);
       setBlogs(res.data);
     } catch (err) {
-      setError("Failed to fetch blogs");
+      console.error("Error fetching blogs:", err);
     }
-    setLoading(false);
-  }
+  };
 
-  async function handleSubmit(e) {
+  const openBlog = (blog) => {
+    setSelectedBlog(blog);
+    setViewOpen(true);
+  };
+
+  const closeBlog = () => {
+    setViewOpen(false);
+    setSelectedBlog(null);
+  };
+
+  const openForm = () => setFormOpen(true);
+  const closeForm = () => {
+    setFormOpen(false);
+    setForm({ title: "", author: "", content: "" });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    if (!form.title || !form.content) {
-      setError("Title and content are required");
-      return;
-    }
     try {
-      const res = await axios.post(`${API}/blogs`, form);
-      setBlogs((prev) => [res.data, ...prev]);
-      setForm({ title: "", content: "", author: "" });
+      await axios.post(`${API}/blogs`, form);
+      fetchBlogs();
+      closeForm();
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
     } catch (err) {
-      setError("Failed to create blog");
+      console.error("Error adding blog:", err);
     }
-  }
+  };
 
   return (
-    <main
-      className="min-h-screen text-white relative"
+    <section
+      className="min-h-screen relative overflow-hidden p-10"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80')",
+          "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1950&q=80')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-purple-900/70 to-black/80"></div>
+      {showConfetti && <Confetti recycle={false} />}
 
-      <div className="relative z-10 p-8">
-        {/* Hero Section */}
-        <section className="h-[60vh] flex flex-col justify-center items-center text-center mb-16">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-10 relative z-10">
+        <motion.h1
+          className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <TypewriterTitle text="Related Blogs" />
+        </motion.h1>
+        <motion.button
+          onClick={openForm}
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold shadow-lg hover:scale-105 transition"
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          + Add Blog
+        </motion.button>
+      </div>
+
+      {/* Blog Grid */}
+      <motion.div
+        className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 relative z-10"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.15 } },
+        }}
+      >
+        {blogs.map((blog) => (
           <motion.div
-            className="px-6"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+            key={blog.id}
+            className="p-6 rounded-3xl bg-white/20 backdrop-blur-md border border-white/10 shadow-xl cursor-pointer hover:shadow-2xl transform-gpu transition-transform"
+            whileHover={{ rotateY: 8, rotateX: -4, scale: 1.05 }}
+            variants={{
+              hidden: { opacity: 0, y: 50 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            onClick={() => openBlog(blog)}
           >
-            <h1 className="text-5xl md:text-6xl font-extrabold mb-4 drop-shadow-lg">
-              Welcome to{" "}
-              <span className="text-[#ff4d6d]">Bloger</span>
-            </h1>
-            <p className="text-gray-200 text-lg md:text-xl max-w-2xl mx-auto">
-              Share your ideas, tutorials, and creativity with the world.
+            <h2 className="text-2xl font-bold mb-1 text-white bg-clip-text">
+              {blog.title}
+            </h2>
+            <p className="text-sm text-white/70">{blog.author || "Unknown Author"}</p>
+            <p className="mt-3 text-sm text-white/80 line-clamp-3">
+              {blog.content?.replace(/<[^>]+>/g, "").slice(0, 120)}...
             </p>
           </motion.div>
-        </section>
+        ))}
+      </motion.div>
 
-        {/* Blog Form */}
-        <motion.div
-          className="bg-white/10 backdrop-blur-xl rounded-2xl p-10 mb-12 max-w-4xl mx-auto shadow-2xl border border-white/20"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h2 className="text-3xl font-bold text-center mb-6 text-[#ff4d6d] drop-shadow-md">
-            Create a New Blog
-          </h2>
-          {error && <div className="text-red-400 text-center mb-4">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <input
-              type="text"
-              placeholder="Title"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full p-4 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-[#ff4d6d]/50 shadow-lg"
-            />
-            <input
-              type="text"
-              placeholder="Author (optional)"
-              value={form.author}
-              onChange={(e) => setForm({ ...form, author: e.target.value })}
-              className="w-full p-4 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-[#ff4d6d]/50 shadow-lg"
-            />
-            <textarea
-              placeholder="Content"
-              rows="6"
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className="w-full p-4 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-[#ff4d6d]/50 shadow-lg"
-            />
-            <motion.button
-              type="submit"
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0px 0px 20px #ff4d6d, 0px 0px 40px #3BC9DB",
-              }}
-              className="w-full py-4 bg-gradient-to-r from-[#ff4d6d] to-[#3BC9DB] text-white rounded-lg font-bold hover:opacity-90 transition-all shadow-2xl"
+      {/* View Blog Modal */}
+      <AnimatePresence>
+        {viewOpen && selectedBlog && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeBlog}
+          >
+            <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 max-w-3xl w-[90%] p-8 rounded-3xl shadow-2xl bg-white/90 backdrop-blur-xl"
+              initial={{ y: 50, scale: 0.95, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 30, scale: 0.98, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 250, damping: 25 }}
             >
-              Publish Blog
-            </motion.button>
-          </form>
-        </motion.div>
-
-        {/* Blogs Grid */}
-        <motion.section
-          className="grid gap-10 md:grid-cols-2 lg:grid-cols-3"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-        >
-          {loading ? (
-            <div className="col-span-full text-center text-xl">
-              Loading blogs...
-            </div>
-          ) : blogs.length === 0 ? (
-            <div className="col-span-full text-center text-white/70 text-xl">
-              No blogs yet.
-            </div>
-          ) : (
-            blogs.map((blog) => (
-              <motion.div
-                key={blog.id}
-                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-2xl cursor-pointer"
-                whileHover={{
-                  rotateY: 8,
-                  rotateX: 4,
-                  scale: 1.05,
-                  boxShadow: "0px 20px 40px rgba(255,77,109,0.7)",
-                }}
-                transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              >
-                <div className="overflow-hidden rounded-lg">
-                  <h3 className="text-2xl font-bold mb-2 text-[#3BC9DB]">
-                    {blog.title}
-                  </h3>
-                  <p className="text-gray-200 mb-4 line-clamp-6">
-                    {blog.content}
-                  </p>
-                  <div className="text-gray-400 text-sm text-right italic">
-                    {blog.author || "Anonymous"}
-                  </div>
+              <header className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-900">
+                    {selectedBlog.title}
+                  </h2>
+                  {selectedBlog.author && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      By {selectedBlog.author}
+                    </p>
+                  )}
                 </div>
-              </motion.div>
-            ))
-          )}
-        </motion.section>
-      </div>
-    </main>
+                <button
+                  onClick={closeBlog}
+                  className="ml-auto rounded-full p-2 hover:bg-gray-100 transition"
+                >
+                  ✕
+                </button>
+              </header>
+              <main className="mt-6 max-h-[65vh] overflow-auto prose prose-pink space-y-4">
+                {selectedBlog.content ? (
+                  <div dangerouslySetInnerHTML={{ __html: selectedBlog.content }} />
+                ) : (
+                  <p className="text-gray-700">No content available.</p>
+                )}
+              </main>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Blog Form Modal */}
+      <AnimatePresence>
+        {formOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeForm}
+          >
+            <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+            <motion.div
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 max-w-2xl w-[90%] p-8 rounded-3xl shadow-2xl bg-gradient-to-br from-white/80 to-pink-50 backdrop-blur-xl border border-white/20"
+              initial={{ y: -30, opacity: 0, scale: 0.9 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -20, opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 250, damping: 20 }}
+            >
+              <header className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-bold text-pink-600">Add New Blog 🚀</h2>
+                <button
+                  onClick={closeForm}
+                  className="rounded-full p-2 hover:bg-gray-200 transition"
+                >
+                  ✕
+                </button>
+              </header>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Title"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border border-pink-300 focus:ring-2 focus:ring-pink-400 focus:outline-none transition"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Author"
+                  value={form.author}
+                  onChange={(e) => setForm({ ...form, author: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+                />
+                <ReactQuill
+                  theme="snow"
+                  value={form.content}
+                  onChange={(value) => setForm({ ...form, content: value })}
+                  className="h-40 mb-10"
+                />
+                <motion.button
+                  type="submit"
+                  className="w-full py-3 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Submit Blog ✨
+                </motion.button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
