@@ -1,21 +1,43 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
+import axios from "axios";
 
 export default function Home() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:3000/api/subscribe", {
+        email,
+      });
+      setStatus(res.data.message);
+      setEmail("");
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setStatus("This email is already subscribed.");
+      } else {
+        setStatus("Something went wrong. Try again later.");
+      }
+    }
+  };
+
   const posts = [
     {
       title: "How to Start Blogging",
       desc: "A quick dive into tips, tricks, and inspiration for creators.",
-      img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80", // blogging image
+      img: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80",
     },
     {
       title: "Top 10 React Tips",
       desc: "Best practices for React developers to level up their apps.",
-      img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80", // coding image
+      img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
     },
     {
       title: "Design Trends 2025",
       desc: "Explore modern design patterns and trends to stay ahead.",
-      img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=600&q=80", // design image
+      img: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=600&q=80",
     },
   ];
 
@@ -97,7 +119,7 @@ export default function Home() {
                   whileHover={{ x: 5 }}
                   className="text-[#00adb5] font-semibold"
                 >
-                  Read More →
+                  Read More
                 </motion.button>
               </div>
             </motion.div>
@@ -106,59 +128,65 @@ export default function Home() {
       </section>
 
       {/* Call to Action */}
-  <section className="bg-gradient-to-r from-[#0f3460] to-[#16213e] py-20 flex justify-center items-center">
-  <motion.div
-    className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 w-full max-w-3xl text-center shadow-lg"
-    initial={{ opacity: 0, y: 50 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.8 }}
-  >
-    <motion.h2
-      className="text-3xl md:text-4xl font-bold mb-6 text-white"
-      initial={{ opacity: 0, y: -20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-    >
-      Stay Updated with Our Latest Posts
-    </motion.h2>
-    <motion.p
-      className="mb-8 text-gray-300 text-lg"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      Subscribe to our newsletter and get the latest content directly to your inbox.
-    </motion.p>
+      <section className="bg-gradient-to-r from-[#0f3460] to-[#16213e] py-20 flex justify-center items-center">
+        <motion.div
+          className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 w-full max-w-3xl text-center shadow-lg"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold mb-6 text-white"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            Stay Updated with Our Latest Posts
+          </motion.h2>
+          <motion.p
+            className="mb-8 text-gray-300 text-lg"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            Subscribe to our newsletter and get the latest content directly to
+            your inbox.
+          </motion.p>
 
-    <motion.form
-      className="flex flex-col sm:flex-row justify-center items-center gap-4"
-      initial={{ scale: 0.95, opacity: 0 }}
-      whileInView={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 0.4 }}
-    >
-      <input
-        type="email"
-        placeholder="Enter your email"
-        className="w-full sm:flex-1 px-5 py-4 rounded-full bg-white text-gray-900 placeholder-gray-500 outline-none shadow-md focus:ring-4 focus:ring-[#00adb5]"
-      />
-      <motion.button
-        whileHover={{
-          scale: 1.05,
-          boxShadow: "0px 0px 20px #00adb5",
-        }}
-        className="bg-[#00adb5] text-black px-8 py-4 rounded-full font-semibold hover:bg-[#08c4cc] transition-all shadow-md"
-      >
-        Subscribe
-      </motion.button>
-    </motion.form>
+          <motion.form
+            onSubmit={handleSubscribe}
+            className="flex flex-col sm:flex-row justify-center items-center gap-4"
+            initial={{ scale: 0.95, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full sm:flex-1 px-5 py-4 rounded-full bg-white text-gray-900 placeholder-gray-500 outline-none shadow-md focus:ring-4 focus:ring-[#00adb5]"
+            />
+            <motion.button
+              type="submit"
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0px 0px 20px #00adb5",
+              }}
+              className="bg-[#00adb5] text-black px-8 py-4 rounded-full font-semibold hover:bg-[#08c4cc] transition-all shadow-md"
+            >
+              Subscribe
+            </motion.button>
+          </motion.form>
 
-    <p className="mt-4 text-gray-400 text-sm">
-      We respect your privacy. No spam ever.
-    </p>
-  </motion.div>
-</section>
+          {status && <p className="mt-4 text-gray-200">{status}</p>}
 
-
+          <p className="mt-4 text-gray-400 text-sm">
+            We respect your privacy. No spam ever.
+          </p>
+        </motion.div>
+      </section>
     </main>
   );
 }

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Confetti from "react-confetti";
+import { PlusCircle, User } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -20,7 +21,11 @@ const TypewriterTitle = ({ text }) => {
     }, 80);
     return () => clearInterval(interval);
   }, [text]);
-  return <span>{displayed}</span>;
+  return (
+    <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-lg">
+      {displayed}
+    </span>
+  );
 };
 
 export default function Blogs() {
@@ -74,65 +79,79 @@ export default function Blogs() {
   };
 
   return (
-    <section
-      className="min-h-screen relative overflow-hidden p-10"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1950&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <section className="relative min-h-screen overflow-hidden p-10 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#3b0764] text-white">
+      {/* Background animated blobs */}
+      <motion.div
+        className="absolute top-20 left-10 w-72 h-72 bg-pink-500/30 rounded-full blur-3xl"
+        animate={{ y: [0, 30, 0], x: [0, 20, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl"
+        animate={{ y: [0, -40, 0], x: [0, -20, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+
       {showConfetti && <Confetti recycle={false} />}
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-10 relative z-10">
+      <div className="flex justify-between items-center mb-12 relative z-10">
         <motion.h1
-          className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg"
+          className="text-4xl md:text-4xl font-extrabold"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <TypewriterTitle text="Related Blogs" />
+          <TypewriterTitle text="Related Blog.... " />
         </motion.h1>
         <motion.button
           onClick={openForm}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold shadow-lg hover:scale-105 transition"
+          className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold shadow-lg hover:shadow-pink-400/50 transition"
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
         >
-          + Add Blog
+          <PlusCircle className="w-5 h-5" /> Add Blog
         </motion.button>
       </div>
 
       {/* Blog Grid */}
       <motion.div
-        className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 relative z-10"
+        className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 relative z-10"
         initial="hidden"
         animate="visible"
         variants={{
           hidden: {},
-          visible: { transition: { staggerChildren: 0.15 } },
+          visible: { transition: { staggerChildren: 0.2 } },
         }}
       >
         {blogs.map((blog) => (
           <motion.div
             key={blog.id}
-            className="p-6 rounded-3xl bg-white/20 backdrop-blur-md border border-white/10 shadow-xl cursor-pointer hover:shadow-2xl transform-gpu transition-transform"
-            whileHover={{ rotateY: 8, rotateX: -4, scale: 1.05 }}
+            className="p-6 rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl group hover:shadow-pink-400/40 transition-all duration-300"
             variants={{
               hidden: { opacity: 0, y: 50 },
               visible: { opacity: 1, y: 0 },
             }}
-            onClick={() => openBlog(blog)}
+            whileHover={{ y: -8 }}
           >
-            <h2 className="text-2xl font-bold mb-1 text-white bg-clip-text">
+            <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-rose-400 to-orange-300 bg-clip-text text-transparent group-hover:drop-shadow-md transition">
               {blog.title}
             </h2>
-            <p className="text-sm text-white/70">{blog.author || "Unknown Author"}</p>
-            <p className="mt-3 text-sm text-white/80 line-clamp-3">
-              {blog.content?.replace(/<[^>]+>/g, "").slice(0, 120)}...
+            <p className="flex items-center gap-2 text-sm text-indigo-300">
+              <User size={16} /> {blog.author || "Unknown Author"}
             </p>
+            {/* Show only preview */}
+            <p className="mt-3 text-sm text-gray-200/90 line-clamp-3">
+              {blog.content
+                ? blog.content.replace(/<[^>]+>/g, "").slice(0, 150) + "..."
+                : "No content available."}
+            </p>
+            <button
+              onClick={() => openBlog(blog)}
+              className="mt-4 text-pink-400 font-semibold hover:text-pink-300 transition cursor-pointer"
+            >
+              Read More
+            </button>
           </motion.div>
         ))}
       </motion.div>
@@ -147,10 +166,11 @@ export default function Blogs() {
             exit={{ opacity: 0 }}
             onClick={closeBlog}
           >
-            <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+            <motion.div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
             <motion.div
               onClick={(e) => e.stopPropagation()}
-              className="relative z-10 max-w-3xl w-[90%] p-8 rounded-3xl shadow-2xl bg-white/90 backdrop-blur-xl"
+              className="relative z-10 max-w-3xl w-[90%] p-10 rounded-3xl shadow-2xl 
+                         bg-gradient-to-br from-gray-50 via-white to-pink-50 text-gray-900"
               initial={{ y: 50, scale: 0.95, opacity: 0 }}
               animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 30, scale: 0.98, opacity: 0 }}
@@ -158,7 +178,7 @@ export default function Blogs() {
             >
               <header className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-3xl font-extrabold text-gray-900">
+                  <h2 className="text-3xl font-extrabold">
                     {selectedBlog.title}
                   </h2>
                   {selectedBlog.author && (
@@ -169,14 +189,16 @@ export default function Blogs() {
                 </div>
                 <button
                   onClick={closeBlog}
-                  className="ml-auto rounded-full p-2 hover:bg-gray-100 transition"
+                  className="ml-auto rounded-full p-2 hover:bg-gray-200 transition"
                 >
                   ✕
                 </button>
               </header>
-              <main className="mt-6 max-h-[65vh] overflow-auto prose prose-pink space-y-4">
+              <main className="mt-6 max-h-[65vh] overflow-auto prose prose-pink text-gray-800">
                 {selectedBlog.content ? (
-                  <div dangerouslySetInnerHTML={{ __html: selectedBlog.content }} />
+                  <div
+                    dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
+                  />
                 ) : (
                   <p className="text-gray-700">No content available.</p>
                 )}
@@ -196,17 +218,20 @@ export default function Blogs() {
             exit={{ opacity: 0 }}
             onClick={closeForm}
           >
-            <motion.div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+            <motion.div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
             <motion.div
               onClick={(e) => e.stopPropagation()}
-              className="relative z-10 max-w-2xl w-[90%] p-8 rounded-3xl shadow-2xl bg-gradient-to-br from-white/80 to-pink-50 backdrop-blur-xl border border-white/20"
+              className="relative z-10 max-w-2xl w-[90%] p-8 rounded-3xl shadow-2xl 
+                         bg-gradient-to-br from-pink-50 via-white to-indigo-50 text-gray-900 border border-gray-200"
               initial={{ y: -30, opacity: 0, scale: 0.9 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -20, opacity: 0, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 250, damping: 20 }}
             >
               <header className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-pink-600">Add New Blog 🚀</h2>
+                <h2 className="text-3xl font-bold text-pink-600">
+                  Add New Blog
+                </h2>
                 <button
                   onClick={closeForm}
                   className="rounded-full p-2 hover:bg-gray-200 transition"
@@ -216,34 +241,55 @@ export default function Blogs() {
               </header>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-pink-300 focus:ring-2 focus:ring-pink-400 focus:outline-none transition"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Author"
-                  value={form.author}
-                  onChange={(e) => setForm({ ...form, author: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
-                />
-                <ReactQuill
-                  theme="snow"
-                  value={form.content}
-                  onChange={(value) => setForm({ ...form, content: value })}
-                  className="h-40 mb-10"
-                />
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Blog title..."
+                    value={form.title}
+                    onChange={(e) =>
+                      setForm({ ...form, title: e.target.value })
+                    }
+                    className="w-full px-4 py-3 rounded-lg border border-pink-300 text-black focus:ring-2 focus:ring-pink-400 focus:outline-none transition"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">
+                    Author
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Author name..."
+                    value={form.author}
+                    onChange={(e) =>
+                      setForm({ ...form, author: e.target.value })
+                    }
+                    className="w-full px-4 py-3 rounded-lg border border-indigo-300 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-2">
+                    Content
+                  </label>
+                  <ReactQuill
+                    theme="snow"
+                    value={form.content}
+                    onChange={(value) =>
+                      setForm({ ...form, content: value })
+                    }
+                    className="h-40 mb-10 text-black"
+                  />
+                </div>
                 <motion.button
                   type="submit"
                   className="w-full py-3 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold shadow-lg"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Submit Blog ✨
+                  Submit Blog
                 </motion.button>
               </form>
             </motion.div>
