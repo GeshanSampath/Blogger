@@ -8,11 +8,14 @@ export class Blog {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'longtext' })
   content: string;
 
   @Column({ nullable: true })
   author?: string;
+
+  @Column({ nullable: true })
+  image?: string;
 
   @CreateDateColumn()
   createdAt: Date;
