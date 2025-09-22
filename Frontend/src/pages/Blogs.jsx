@@ -33,7 +33,7 @@ export default function Blogs() {
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", author: "", content: "" });
+  const [form, setForm] = useState({ title: "", author: "", content: "", image: null });
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -61,14 +61,29 @@ export default function Blogs() {
 
   const openForm = () => setFormOpen(true);
   const closeForm = () => {
+    setFormOpen({ title: "", author: "", content: "", image: null });
     setFormOpen(false);
-    setForm({ title: "", author: "", content: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!form.image) {
+      alert("Please select an image for the blog.");
+      return;
+    }
+
     try {
-      await axios.post(`${API}/blogs`, form);
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("author", form.author || "");
+      formData.append("content", form.content);
+      formData.append("image", form.image);
+
+      await axios.post(`${API}/blogs`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       fetchBlogs();
       closeForm();
       setShowConfetti(true);
@@ -80,7 +95,7 @@ export default function Blogs() {
 
   return (
     <section className="relative min-h-screen overflow-hidden p-10 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#3b0764] text-white">
-      {/* Background animated blobs */}
+      {/* Background blobs */}
       <motion.div
         className="absolute top-20 left-10 w-72 h-72 bg-pink-500/30 rounded-full blur-3xl"
         animate={{ y: [0, 30, 0], x: [0, 20, 0] }}
@@ -134,13 +149,19 @@ export default function Blogs() {
             }}
             whileHover={{ y: -8 }}
           >
+            {blog.image && (
+              <img
+                src={`${API}/${blog.image}`}
+                alt={blog.title}
+                className="w-full h-48 object-cover rounded-xl mb-4"
+              />
+            )}
             <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-rose-400 to-orange-300 bg-clip-text text-transparent group-hover:drop-shadow-md transition">
               {blog.title}
             </h2>
             <p className="flex items-center gap-2 text-sm text-indigo-300">
               <User size={16} /> {blog.author || "Unknown Author"}
             </p>
-            {/* Show only preview */}
             <p className="mt-3 text-sm text-gray-200/90 line-clamp-3">
               {blog.content
                 ? blog.content.replace(/<[^>]+>/g, "").slice(0, 150) + "..."
@@ -155,58 +176,6 @@ export default function Blogs() {
           </motion.div>
         ))}
       </motion.div>
-
-      {/* View Blog Modal */}
-      <AnimatePresence>
-        {viewOpen && selectedBlog && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeBlog}
-          >
-            <motion.div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
-            <motion.div
-              onClick={(e) => e.stopPropagation()}
-              className="relative z-10 max-w-3xl w-[90%] p-10 rounded-3xl shadow-2xl 
-                         bg-gradient-to-br from-gray-50 via-white to-pink-50 text-gray-900"
-              initial={{ y: 50, scale: 0.95, opacity: 0 }}
-              animate={{ y: 0, scale: 1, opacity: 1 }}
-              exit={{ y: 30, scale: 0.98, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 250, damping: 25 }}
-            >
-              <header className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-3xl font-extrabold">
-                    {selectedBlog.title}
-                  </h2>
-                  {selectedBlog.author && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      By {selectedBlog.author}
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={closeBlog}
-                  className="ml-auto rounded-full p-2 hover:bg-gray-200 transition"
-                >
-                  ✕
-                </button>
-              </header>
-              <main className="mt-6 max-h-[65vh] overflow-auto prose prose-pink text-gray-800">
-                {selectedBlog.content ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
-                  />
-                ) : (
-                  <p className="text-gray-700">No content available.</p>
-                )}
-              </main>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Add Blog Form Modal */}
       <AnimatePresence>
@@ -256,6 +225,7 @@ export default function Blogs() {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-1">
                     Author
@@ -270,6 +240,7 @@ export default function Blogs() {
                     className="w-full px-4 py-3 rounded-lg border border-indigo-300 text-black focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
                   />
                 </div>
+
                 <div>
                   <label className="text-sm font-semibold text-gray-700 block mb-2">
                     Content
@@ -280,9 +251,25 @@ export default function Blogs() {
                     onChange={(value) =>
                       setForm({ ...form, content: value })
                     }
-                    className="h-40 mb-10 text-black"
+                    className="h-40 mb-4 text-black"
                   />
                 </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1">
+                    Blog Image <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setForm({ ...form, image: e.target.files[0] })
+                    }
+                    className="w-full p-2 border rounded mb-4"
+                    required
+                  />
+                </div>
+
                 <motion.button
                   type="submit"
                   className="w-full py-3 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold shadow-lg"

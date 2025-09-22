@@ -3,43 +3,27 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog } from './blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Injectable()
 export class BlogsService {
   constructor(
     @InjectRepository(Blog)
-    private readonly repo: Repository<Blog>,
+    private readonly blogRepo: Repository<Blog>,
   ) {}
 
+  // Fetch all blogs, newest first
   async findAll(): Promise<Blog[]> {
-    return this.repo.find({ order: { createdAt: 'DESC' } });
+    return this.blogRepo.find({ order: { createdAt: 'DESC' } });
   }
 
- async findOne(id: number): Promise<Blog | null> {
-  return this.repo.findOneBy({ id });
-}
-
-
-  async create(createBlogDto: CreateBlogDto): Promise<Blog> {
-    const blog = this.repo.create(createBlogDto);
-    return this.repo.save(blog);
+  // Fetch a single blog by id
+  async findOne(id: number): Promise<Blog | null> {
+    return this.blogRepo.findOneBy({ id });
   }
 
-async update(id: number, updateBlogDto: UpdateBlogDto): Promise<Blog> {
-  const blog = await this.repo.preload({
-    id: id,
-    ...updateBlogDto,
-  });
-
-  if (!blog) {
-    throw new Error(`Blog with id ${id} not found`);
-  }
-
-  return this.repo.save(blog);
-}
-
-  async remove(id: number): Promise<void> {
-    await this.repo.delete(id);
+  // Create a blog with image
+  async create(dto: CreateBlogDto, imagePath: string): Promise<Blog> {
+    const blog = this.blogRepo.create({ ...dto, image: imagePath });
+    return this.blogRepo.save(blog);
   }
 }

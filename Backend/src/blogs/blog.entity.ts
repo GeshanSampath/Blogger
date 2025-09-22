@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('blog') // table name in DB
+@Entity()
 export class Blog {
   @PrimaryGeneratedColumn()
   id: number;
@@ -8,14 +8,14 @@ export class Blog {
   @Column()
   title: string;
 
+  @Column()
+  author: string;
+
   @Column({ type: 'longtext' })
   content: string;
 
-  @Column({ nullable: true })
-  author?: string;
-
-  @Column({ nullable: true })
-  image?: string;
+  @Column()
+  image: string; // path to the uploaded image
 
   @CreateDateColumn()
   createdAt: Date;

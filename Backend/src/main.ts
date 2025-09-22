@@ -1,17 +1,17 @@
-// main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  // Allow frontend at 5173
-  app.enableCors({
-    origin: 'http://localhost:5173', // your React frontend
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  // Serve uploads folder
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
   });
 
+  app.enableCors(); // allow frontend calls
   await app.listen(3000);
 }
 bootstrap();

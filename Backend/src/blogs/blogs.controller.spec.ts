@@ -8,23 +8,23 @@ describe('BlogsController', () => {
   let controller: BlogsController;
   let service: BlogsService;
 
-  // Mock blog to match Blog entity
   const mockBlog: Blog = {
     id: 1,
     title: 'Test Blog',
     content: 'Test content',
     author: 'Test Author',
+    image: 'uploads/test-image.jpg',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  // Mock service
   const mockBlogService = {
     findAll: jest.fn().mockResolvedValue([mockBlog]),
-    create: jest.fn().mockImplementation((dto: CreateBlogDto) => 
+    create: jest.fn().mockImplementation((dto: CreateBlogDto, imagePath: string) =>
       Promise.resolve({
         id: 1,
         ...dto,
+        image: imagePath,
         createdAt: new Date(),
         updatedAt: new Date(),
       }),
@@ -51,24 +51,41 @@ describe('BlogsController', () => {
   });
 
   it('should return an array of blogs', async () => {
-    const result = await controller.getAll();
+    const result = await controller.getBlogs();
     expect(result).toEqual([mockBlog]);
     expect(service.findAll).toHaveBeenCalled();
   });
 
-  it('should create a blog', async () => {
+  it('should create a blog with uploaded file', async () => {
     const createDto: CreateBlogDto = {
       title: 'Test Blog',
       content: 'Test content',
       author: 'Test Author',
     };
-    const result = await controller.create(createDto);
+
+    // Mock uploaded file
+    const mockFile = {
+      filename: 'test-image.jpg',
+    } as Express.Multer.File;
+
+    const result = await controller.createBlog(
+      mockFile,
+      createDto.title,
+      createDto.author!,
+      createDto.content,
+    );
+
     expect(result).toEqual({
       id: 1,
       ...createDto,
+      image: `uploads/${mockFile.filename}`,
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
-    expect(service.create).toHaveBeenCalledWith(createDto);
+
+    expect(service.create).toHaveBeenCalledWith(
+      createDto,
+      `uploads/${mockFile.filename}`,
+    );
   });
 });
