@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ContactModule } from './contact/contact.module';
 import { BlogsModule } from './blogs/blogs.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+
 
 @Module({
   imports: [
@@ -9,14 +12,19 @@ import { BlogsModule } from './blogs/blogs.module';
       type: 'mysql',
       host: 'localhost',
       port: 3306,
-      username: 'root',       // XAMPP MySQL username
-      password: '',           // XAMPP MySQL password
-      database: 'blogger', // Database name
+      username: 'root',
+      password: '', 
+      database: 'blogger',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,      // auto-create tables (dev only)
+      synchronize: true,
+      
     }),
     BlogsModule,
     ContactModule,
+    UsersModule,
+    AuthModule
   ],
+
+  
 })
 export class AppModule {}

@@ -8,14 +8,14 @@ export class Blog {
   @Column()
   title: string;
 
-  @Column()
-  author: string;
+  @Column({ nullable: true }) // optional author
+  author?: string;
 
   @Column({ type: 'longtext' })
   content: string;
 
   @Column()
-  image: string; // path to the uploaded image
+  image: string; // path to uploaded image
 
   @CreateDateColumn()
   createdAt: Date;
