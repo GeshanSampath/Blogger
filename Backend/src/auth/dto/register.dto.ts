@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsEnum } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { UserRole } from '../../users/users.entity';
 
 export class RegisterDto {
@@ -12,6 +12,10 @@ export class RegisterDto {
   password: string;
 
   @IsOptional()
-  @IsEnum(UserRole, { message: 'Role must be author or user' })
-  role?: UserRole; // default: user
+  @IsEnum(UserRole, { message: 'Role must be either super_admin, author, or user' })
+  role?: UserRole;
+
+  @IsOptional()
+  @IsBoolean()
+  isApproved?: boolean;  // 👈 for authors, defaults to false until super admin approves
 }

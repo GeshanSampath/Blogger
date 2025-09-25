@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+// src/users/users.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Blog } from '../blogs/blog.entity';
+import { Comment } from '../comments/comments.entity';
 
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
@@ -20,15 +23,15 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
-  role: UserRole;
+  @Column({ default: 'author' })
+  role: string;
 
   @Column({ default: false })
   isApproved: boolean;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @OneToMany(() => Blog, blog => blog.author) 
+  blogs: Blog[];
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+ @OneToMany(() => Comment, (comment) => comment.author)
+comments: Comment[];
 }

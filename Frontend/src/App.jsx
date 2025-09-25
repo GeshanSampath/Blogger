@@ -10,6 +10,7 @@ import AdminLayout from "./pages/Admin/AdminLayout";
 import PendingAuthors from "./pages/Admin/PendingAuthors";
 import AdminRoute from "./routes/AdminRoute";
 import ManageBlogs from "./pages/Admin/ManageBlogs";
+import AuthorDashboard from "./pages/Author/AuthorDashboard";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/admin/pending-authors" element={<PendingAuthors />} />
         <Route path="/admin/*" element={<AdminRoute><AdminLayout /></AdminRoute>} />
         <Route path="/admin/manage-blogs" element={<ManageBlogs />} />
+        <Route path="/Author/AuthorDashboard" element={<AuthorDashboard />} />
         
 
       </Routes>

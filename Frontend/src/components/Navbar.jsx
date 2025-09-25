@@ -42,7 +42,7 @@ export default function Navbar() {
           <Link to="/about">About</Link>
         </li>
         <li>
-          <Link to="/blogs">Blogs</Link>
+          <Link to="/Blogs/BlogList">Blogs</Link>
         </li>
         <li>
           <Link to="/contact">Contact</Link>
@@ -55,7 +55,7 @@ export default function Navbar() {
         )}
         {loggedIn && role === "author" && (
           <li>
-            <Link to="/dashboard/author">Dashboard</Link>
+            <Link to="/Author/AuthorDashboard">Profile</Link>
           </li>
         )}
 
