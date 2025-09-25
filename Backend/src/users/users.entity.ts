@@ -11,6 +11,9 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  name: string;   // 👈 Add full name field
+
   @Column({ unique: true })
   email: string;
 

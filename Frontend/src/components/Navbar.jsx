@@ -50,7 +50,7 @@ export default function Navbar() {
 
         {loggedIn && role === "super_admin" && (
           <li>
-            <Link to="/dashboard/super-admin">Dashboard</Link>
+            <Link to="/Admin/AdminLayout">Dashboard</Link>
           </li>
         )}
         {loggedIn && role === "author" && (

@@ -12,6 +12,6 @@ export class RegisterDto {
   password: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsEnum(UserRole, { message: 'Role must be author or user' })
+  role?: UserRole; // default: user
 }

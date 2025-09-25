@@ -1,3 +1,4 @@
+// src/users/users.controller.ts
 import { Controller, Get, Patch, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 
@@ -5,11 +6,13 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
+  // Get all authors waiting for approval
   @Get('pending-authors')
   getPendingAuthors() {
     return this.usersService.findAllAuthorsPendingApproval();
   }
 
+  // Approve author by ID
   @Patch('approve/:id')
   approveAuthor(@Param('id') id: string) {
     return this.usersService.approveAuthor(+id);

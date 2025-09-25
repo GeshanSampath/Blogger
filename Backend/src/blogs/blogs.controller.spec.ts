@@ -68,11 +68,10 @@ describe('BlogsController', () => {
       filename: 'test-image.jpg',
     } as Express.Multer.File;
 
+    // Call controller with correct 2 arguments
     const result = await controller.createBlog(
       mockFile,
-      createDto.title,
-      createDto.author!,
-      createDto.content,
+      createDto
     );
 
     expect(result).toEqual({
@@ -85,7 +84,7 @@ describe('BlogsController', () => {
 
     expect(service.create).toHaveBeenCalledWith(
       createDto,
-      `uploads/${mockFile.filename}`,
+      `uploads/${mockFile.filename}`
     );
   });
 });
