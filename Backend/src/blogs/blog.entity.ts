@@ -1,6 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../users/users.entity';
 import { Comment } from '../comments/comments.entity';
+
+export enum BlogStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+}
 
 @Entity()
 export class Blog {
@@ -10,24 +15,18 @@ export class Blog {
   @Column()
   title: string;
 
-  @Column('text')
+  @Column({ type: 'text' })
   content: string;
 
   @Column({ nullable: true })
-  image: string; 
+  image: string; // fixed from imageUrl
 
-  @Column({ default: false })
-  isPublished: boolean;
+  @Column({ type: 'enum', enum: BlogStatus, default: BlogStatus.PENDING })
+  status: BlogStatus;
 
-  @Column({ default: 'pending' })
-  status: 'pending' | 'approved' | 'rejected';
-
-  @ManyToOne(() => User, user => user.blogs, { eager: true })
+  @ManyToOne(() => User, (user) => user.blogs, { eager: true })
   author: User;
 
-  @OneToMany(() => Comment, comment => comment.blog, { cascade: true })
+  @OneToMany(() => Comment, (comment) => comment.blog, { cascade: true })
   comments: Comment[];
-
-  @CreateDateColumn()
-  createdAt: Date;
 }

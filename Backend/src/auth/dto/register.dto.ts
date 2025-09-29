@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsEnum, IsBoolean } from 'class-validator';
+// src/auth/dto/register.dto.ts
+import { IsEmail, IsNotEmpty, IsEnum } from 'class-validator';
 import { UserRole } from '../../users/users.entity';
 
 export class RegisterDto {
@@ -8,14 +9,9 @@ export class RegisterDto {
   @IsEmail()
   email: string;
 
-  @MinLength(6)
+  @IsNotEmpty()
   password: string;
 
-  @IsOptional()
-  @IsEnum(UserRole, { message: 'Role must be either super_admin, author, or user' })
-  role?: UserRole;
-
-  @IsOptional()
-  @IsBoolean()
-  isApproved?: boolean;  // 👈 for authors, defaults to false until super admin approves
+  @IsEnum(UserRole, { message: 'Role must be one of super_admin, author, or user' })
+  role: UserRole;
 }

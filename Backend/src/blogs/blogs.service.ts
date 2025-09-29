@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Blog } from './blog.entity';
+import { Blog, BlogStatus } from './blog.entity';
 import { Comment } from '../comments/comments.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
@@ -17,7 +17,7 @@ export class BlogsService {
 
   findAll(): Promise<Blog[]> {
     return this.blogsRepo.find({
-      where: { status: 'approved' },
+      where: { status: BlogStatus.APPROVED },
       relations: ['author'],
     });
   }
@@ -32,9 +32,9 @@ export class BlogsService {
   async create(dto: CreateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
     const blog = this.blogsRepo.create({
       ...dto,
-      imageUrl: imagePath ?? undefined,
+      image: imagePath ?? dto.image,
       author: { id: userId },
-      status: 'pending',
+      status: BlogStatus.PENDING,
     });
     return this.blogsRepo.save(blog);
   }
@@ -50,7 +50,7 @@ export class BlogsService {
     Object.assign(blog, dto);
 
     if (imagePath !== undefined) {
-      blog.imageUrl = imagePath;
+      blog.image = imagePath;
     }
 
     return this.blogsRepo.save(blog);
@@ -74,6 +74,7 @@ export class BlogsService {
       relations: ['comments'],
     });
     if (!blog) throw new NotFoundException('Blog not found');
-    return blog.comments?.filter(c => c.status === 'approved') ?? [];
+
+    return blog.comments?.filter(c => c.isApproved) ?? [];
   }
 }

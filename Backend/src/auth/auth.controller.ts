@@ -1,31 +1,36 @@
-import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto'; // We'll create this DTO
+import { LoginDto } from './dto/login.dto';
 
-@Controller('auth') // Base path: /auth
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Register new user
   @Post('register')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   async register(@Body() dto: RegisterDto) {
-    try {
-      const user = await this.authService.register(dto);
-      return { message: 'User registered successfully', user };
-    } catch (err) {
-      throw new BadRequestException(err.message);
-    }
+    const user = await this.authService.register(dto);
+    return {
+      message: 'User registered successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isApproved: user.isApproved,
+      },
+    };
   }
 
-  // Login
   @Post('login')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   async login(@Body() dto: LoginDto) {
-    try {
-      const result = await this.authService.login(dto.email, dto.password);
-      return { message: 'Login successful', ...result };
-    } catch (err) {
-      throw new BadRequestException(err.message);
-    }
+    const { accessToken, role } = await this.authService.login(dto);
+    return {
+      message: 'Login successful',
+      accessToken,
+      role,
+    };
   }
 }

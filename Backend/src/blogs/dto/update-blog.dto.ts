@@ -1,6 +1,4 @@
-export class UpdateBlogDto {
-  title?: string;
-  content?: string;
-  image?: string;
-  isPublished?: boolean;
-}
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateBlogDto } from './create-blog.dto';
+
+export class UpdateBlogDto extends PartialType(CreateBlogDto) {}

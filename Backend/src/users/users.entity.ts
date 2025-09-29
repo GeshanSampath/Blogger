@@ -15,7 +15,7 @@ export class User {
   id: number;
 
   @Column()
-  name: string;   // 👈 Add full name field
+  name: string;
 
   @Column({ unique: true })
   email: string;
@@ -23,15 +23,15 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'author' })
-  role: string;
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
 
   @Column({ default: false })
   isApproved: boolean;
 
-  @OneToMany(() => Blog, blog => blog.author) 
+  @OneToMany(() => Blog, blog => blog.author)
   blogs: Blog[];
 
- @OneToMany(() => Comment, (comment) => comment.author)
-comments: Comment[];
+  @OneToMany(() => Comment, comment => comment.user)
+  comments: Comment[];
 }
