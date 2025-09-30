@@ -1,3 +1,4 @@
+// src/comments/comments.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Blog } from '../blogs/blog.entity';
 import { User } from '../users/users.entity';
@@ -7,15 +8,14 @@ export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text' })
+  @Column()
   content: string;
 
-  @Column({ default: false })
-  isApproved: boolean; // fixed from status
+  @ManyToOne(() => Blog, blog => blog.comments)
+  blog: Blog;
 
-  @ManyToOne(() => User, (user) => user.comments, { eager: true })
+  @ManyToOne(() => User, user => user.comments)
   user: User;
 
-  @ManyToOne(() => Blog, (blog) => blog.comments)
-  blog: Blog;
+  isApproved: boolean;
 }

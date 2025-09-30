@@ -12,14 +12,8 @@ export class AuthController {
   async register(@Body() dto: RegisterDto) {
     const user = await this.authService.register(dto);
     return {
-      message: 'User registered successfully',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isApproved: user.isApproved,
-      },
+      message: 'User registered',
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
     };
   }
 
@@ -27,10 +21,6 @@ export class AuthController {
   @UsePipes(new ValidationPipe({ whitelist: true }))
   async login(@Body() dto: LoginDto) {
     const { accessToken, role } = await this.authService.login(dto);
-    return {
-      message: 'Login successful',
-      accessToken,
-      role,
-    };
+    return { message: 'Login successful', accessToken, role };
   }
 }

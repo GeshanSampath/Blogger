@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../users/users.entity';
 import { Comment } from '../comments/comments.entity';
 
@@ -9,24 +17,22 @@ export enum BlogStatus {
 
 @Entity()
 export class Blog {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn() id: number;
 
-  @Column()
-  title: string;
+  @Column({ length: 150 }) title: string;
 
-  @Column({ type: 'text' })
-  content: string;
+  @Column('longtext') content: string;
 
-  @Column({ nullable: true })
-  image: string; // fixed from imageUrl
+  @Column() image: string;
 
   @Column({ type: 'enum', enum: BlogStatus, default: BlogStatus.PENDING })
   status: BlogStatus;
 
-  @ManyToOne(() => User, (user) => user.blogs, { eager: true })
-  author: User;
+  @ManyToOne(() => User, (user) => user.blogs, { eager: true }) author: User;
 
-  @OneToMany(() => Comment, (comment) => comment.blog, { cascade: true })
+  @OneToMany(() => Comment, (comment) => comment.blog, { cascade: true, onDelete: 'CASCADE' })
   comments: Comment[];
+
+  @CreateDateColumn() createdAt: Date;
+  @UpdateDateColumn() updatedAt: Date;
 }

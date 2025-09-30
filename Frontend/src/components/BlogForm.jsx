@@ -13,12 +13,11 @@ export default function BlogForm({ blog, onClose, onSuccess }) {
     if (blog) {
       setTitle(blog.title || "");
       setContent(blog.content || "");
-      setImage(null);
     } else {
       setTitle("");
       setContent("");
-      setImage(null);
     }
+    setImage(null);
   }, [blog]);
 
   const handleSubmit = async (e) => {
@@ -26,6 +25,11 @@ export default function BlogForm({ blog, onClose, onSuccess }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in first");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("title", title);
       formData.append("content", content);
@@ -33,11 +37,11 @@ export default function BlogForm({ blog, onClose, onSuccess }) {
 
       if (blog) {
         await axios.put(`${API}/blogs/${blog.id}`, formData, {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          headers: { Authorization: `Bearer ${token}` },
         });
       } else {
         await axios.post(`${API}/blogs`, formData, {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
 
@@ -45,7 +49,7 @@ export default function BlogForm({ blog, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       console.error("Error saving blog:", err);
-      alert("Failed to save blog. Check console for details.");
+      alert(err.response?.data?.message || "Failed to save blog");
     } finally {
       setLoading(false);
     }
@@ -76,19 +80,11 @@ export default function BlogForm({ blog, onClose, onSuccess }) {
           className="p-2 rounded bg-gray-700 text-white h-40"
         />
 
-        {/* Preview existing image if editing */}
-        {blog?.image && !image && (
-          <img
-            src={`${API}${blog.image}`}
-            alt="Current"
-            className="w-full h-40 object-cover rounded"
-          />
-        )}
-
         <input
           type="file"
           accept="image/*"
           onChange={(e) => setImage(e.target.files[0])}
+          required={!blog}
           className="text-white"
         />
 

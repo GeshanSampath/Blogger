@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Blog, BlogStatus } from './blog.entity';
@@ -29,27 +29,28 @@ export class BlogsService {
     });
   }
 
-  async create(dto: CreateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
-    const blog = this.blogsRepo.create({
-      ...dto,
-      image: imagePath ?? dto.image,
-      author: { id: userId },
-      status: BlogStatus.PENDING,
-    });
-    return this.blogsRepo.save(blog);
-  }
+  async create(dto: CreateBlogDto, userId: number, imagePath: string): Promise<Blog> {
+  const blog = this.blogsRepo.create({
+    ...dto,
+    image: imagePath,
+    author: { id: userId }, // ✅ set from JWT
+    status: BlogStatus.PENDING,
+  });
+  return this.blogsRepo.save(blog);
+}
 
   async update(id: number, dto: UpdateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
     const blog = await this.blogsRepo.findOne({
       where: { id },
-      relations: ['author', 'comments'],
+      relations: ['author'],
     });
     if (!blog) throw new NotFoundException('Blog not found');
     if (blog.author.id !== userId) throw new ForbiddenException('Not allowed');
 
-    Object.assign(blog, dto);
+    if (dto.title) blog.title = dto.title;
+    if (dto.content) blog.content = dto.content;
 
-    if (imagePath !== undefined) {
+    if (imagePath) {
       blog.image = imagePath;
     }
 
@@ -57,10 +58,7 @@ export class BlogsService {
   }
 
   async delete(id: number, userId: number): Promise<{ message: string }> {
-    const blog = await this.blogsRepo.findOne({
-      where: { id },
-      relations: ['author'],
-    });
+    const blog = await this.blogsRepo.findOne({ where: { id }, relations: ['author'] });
     if (!blog) throw new NotFoundException('Blog not found');
     if (blog.author.id !== userId) throw new ForbiddenException('Not allowed');
 
@@ -69,12 +67,11 @@ export class BlogsService {
   }
 
   async getComments(blogId: number) {
-    const blog = await this.blogsRepo.findOne({
-      where: { id: blogId },
-      relations: ['comments'],
-    });
+    const blog = await this.blogsRepo.findOne({ where: { id: blogId } });
     if (!blog) throw new NotFoundException('Blog not found');
 
-    return blog.comments?.filter(c => c.isApproved) ?? [];
+    return this.commentRepo.find({
+      where: { blog: { id: blogId }, isApproved: true },
+    });
   }
 }
