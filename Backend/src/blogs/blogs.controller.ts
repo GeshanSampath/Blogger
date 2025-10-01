@@ -4,6 +4,7 @@ import {
   Post,
   Put,
   Delete,
+  Patch,
   Param,
   Body,
   UseGuards,
@@ -23,6 +24,9 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 import { GetUser } from '../auth/get-user.decorator';
 import type { Response } from 'express';
 import { existsSync } from 'fs';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../users/users.entity';
 
 function editFileName(req, file, callback) {
   const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -40,20 +44,20 @@ function imageFileFilter(req, file, callback) {
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 
-  // ✅ Anyone can see APPROVED blogs
+  // ✅ Public: approved blogs only
   @Get()
   getAll() {
     return this.blogsService.findAll();
   }
 
-  // ✅ Author can see their own blogs
+  // ✅ Author: see own blogs
   @UseGuards(JwtAuthGuard)
   @Get('author')
   getMine(@GetUser('id') userId: number) {
     return this.blogsService.findByAuthor(userId);
   }
 
-  // ✅ Create blog - userId is taken from JWT
+  // ✅ Author: create blog (defaults to PENDING)
   @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(
@@ -71,14 +75,10 @@ export class BlogsController {
     @GetUser('id') userId: number,
   ) {
     if (!file) throw new BadRequestException('Image is required');
-    return this.blogsService.create(
-      dto,
-      userId,
-      `/uploads/blogs/${file.filename}`,
-    );
+    return this.blogsService.create(dto, userId, `/uploads/blogs/${file.filename}`);
   }
 
-  // ✅ Update blog - only by the same author
+  // ✅ Author: update blog
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @UseInterceptors(
@@ -100,31 +100,50 @@ export class BlogsController {
     return this.blogsService.update(id, dto, userId, imagePath);
   }
 
-  // ✅ Delete blog - only by same author
+  // ✅ Author: delete blog
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  delete(
-    @Param('id', ParseIntPipe) id: number,
-    @GetUser('id') userId: number,
-  ) {
+  delete(@Param('id', ParseIntPipe) id: number, @GetUser('id') userId: number) {
     return this.blogsService.delete(id, userId);
   }
 
-  // ✅ Public: get approved comments for blog
+  // ✅ Public: get approved comments
   @Get(':id/comments')
   getComments(@Param('id', ParseIntPipe) blogId: number) {
     return this.blogsService.getComments(blogId);
   }
 
-  // ✅ NEW ENDPOINT: serve uploaded images
+  // ✅ Public: serve uploaded images
   @Get('images/:filename')
   getImage(@Param('filename') filename: string, @Res() res: Response) {
     const filePath = join(process.cwd(), 'uploads/blogs', filename);
-
     if (!existsSync(filePath)) {
       return res.status(404).json({ message: 'Image not found' });
     }
-
     return res.sendFile(filePath);
+  }
+
+  // ✅ SuperAdmin: view pending blogs
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @Get('pending')
+  getPending() {
+    return this.blogsService.findPending();
+  }
+
+  // ✅ SuperAdmin: approve blog
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @Patch(':id/approve')
+  approve(@Param('id', ParseIntPipe) id: number) {
+    return this.blogsService.approve(id);
+  }
+
+  // ✅ SuperAdmin: reject blog
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @Patch(':id/reject')
+  reject(@Param('id', ParseIntPipe) id: number) {
+    return this.blogsService.reject(id);
   }
 }

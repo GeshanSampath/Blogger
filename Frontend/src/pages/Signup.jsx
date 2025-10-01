@@ -39,72 +39,103 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 to-blue-500">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Create an Account 📝
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-gray-100 to-blue-50 px-4 relative overflow-hidden">
+      {/* Decorative Background */}
+      <div className="absolute -top-10 -left-10 w-40 h-40 bg-green-200 rounded-full blur-3xl opacity-30"></div>
+      <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-blue-300 rounded-full blur-3xl opacity-40"></div>
 
+      {/* Signup Card */}
+      <div className="relative z-10 bg-white w-full max-w-md rounded-2xl shadow-2xl p-10 border border-gray-200">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-green-600 to-blue-500 bg-clip-text text-transparent">
+            Blogger 
+          </h1>
+          <p className="text-gray-500 mt-2 text-sm">Create your account</p>
+        </div>
+
+        {/* Error and Success Messages */}
         {error && (
           <div className="mb-4 p-3 text-red-700 bg-red-100 border border-red-300 rounded-lg">
             {error}
           </div>
         )}
-
         {message && (
           <div className="mb-4 p-3 text-green-700 bg-green-100 border border-green-300 rounded-lg">
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+            />
+          </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+          <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="username@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+            />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
+          <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="********"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+            />
+          </div>
 
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            <option value="user">User</option>
-            <option value="author">Author</option>
-          </select>
+          <div>
+            <label className="text-sm font-semibold text-gray-700 block mb-1">
+              Role
+            </label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+            >
+              <option value="user">User</option>
+              <option value="author">Author</option>
+            </select>
+          </div>
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition duration-300"
+            className="w-full py-3 rounded-lg bg-gradient-to-r from-green-600 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg hover:scale-[1.01] transition-all duration-200"
           >
             Sign Up
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center text-gray-600">
+        <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <a
+            href="/login"
+            className="text-blue-600 font-semibold hover:underline"
+          >
             Log in
           </a>
         </p>

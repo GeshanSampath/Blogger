@@ -1,4 +1,3 @@
-// src/users/users.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,5 +22,14 @@ export class UsersService {
 
     user.isApproved = true;
     return this.usersRepo.save(user);
+  }
+
+  // ✅ New reject method
+  async rejectAuthor(id: number): Promise<{ message: string }> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.usersRepo.remove(user);
+    return { message: `Author ${id} has been rejected and removed` };
   }
 }
