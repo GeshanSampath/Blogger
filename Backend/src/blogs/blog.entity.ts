@@ -23,7 +23,7 @@ export class Blog {
   @Column()
   title: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'longtext' })
   content: string;
 
   @Column({ nullable: true })
