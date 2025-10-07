@@ -7,28 +7,33 @@ import {
   OneToMany,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from '../users/users.entity';
 import { Blog } from '../blogs/blog.entity';
-import { Reply } from './reply.entity';
+import { User } from '../users/users.entity';
 
 @Entity()
 export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text' })
-  text: string;
-
-  @ManyToOne(() => Blog, (blog) => blog.comments, { onDelete: 'CASCADE' })
-  blog: Blog;
-
-  // 🔹 THIS must exist because the service code references `comment.user`
-  @ManyToOne(() => User, (user) => user.comments, { eager: false })
-  user: User;
-
-  @OneToMany(() => Reply, (reply) => reply.comment, { cascade: true })
-  replies: Reply[];
+  @Column()
+  content: string;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  // User who wrote the comment
+  @ManyToOne(() => User, (user) => user.comments, { eager: true })
+  user: User;
+
+  // Blog the comment belongs to
+  @ManyToOne(() => Blog, (blog) => blog.comments, { onDelete: 'CASCADE' })
+  blog: Blog;
+
+  // Replies to this comment
+  @OneToMany(() => Comment, (reply) => reply.parent, { cascade: true })
+  replies: Comment[];
+
+  // If this is a reply, point to parent
+  @ManyToOne(() => Comment, (comment) => comment.replies, { nullable: true })
+  parent: Comment;
 }

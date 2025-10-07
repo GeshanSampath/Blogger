@@ -1,13 +1,13 @@
-// src/comments/reply.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../users/users.entity';
-import { Comment } from './comment.entity';
+import { Comment } from '../comments/comment.entity';
 
 @Entity()
 export class Reply {
@@ -15,15 +15,17 @@ export class Reply {
   id: number;
 
   @Column({ type: 'text' })
-  text: string;
+  content: string;
 
   @ManyToOne(() => Comment, (comment) => comment.replies, { onDelete: 'CASCADE' })
   comment: Comment;
 
-  // 🔹 So we can call `reply.user`
-  @ManyToOne(() => User, (user) => user.replies)
+  @ManyToOne(() => User, (user) => user.replies, { eager: true })
   user: User;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

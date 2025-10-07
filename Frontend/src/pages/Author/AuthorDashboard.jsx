@@ -1,127 +1,77 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import BlogForm from "../../components/BlogForm";
-import { PlusCircle } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function AuthorDashboard() {
-  const [blogs, setBlogs] = useState([]);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState(null);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [authorName, setAuthorName] = useState("");
 
-  // Fetch blogs of logged-in author
-  const fetchBlogs = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please login again");
-        return;
-      }
-      const res = await axios.get(`${API}/blogs/author`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setBlogs(res.data);
-      if (res.data.length > 0) {
-        setAuthorName(res.data[0].author?.name || "Author");
-      }
-    } catch (err) {
-      console.error("Error fetching blogs:", err);
-      if (err.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        localStorage.removeItem("token");
-      }
-    }
-  };
-
   useEffect(() => {
-    fetchBlogs();
+    const fetchBlogCounts = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${API}/blogs/author`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const blogs = res.data;
+        setAuthorName(blogs[0]?.author?.name || "Author");
+
+        const approved = blogs.filter(b => b.status === "approved").length;
+        const rejected = blogs.filter(b => b.status === "rejected").length;
+
+        setApprovedCount(approved);
+        setRejectedCount(rejected);
+        setTotalCount(blogs.length);
+      } catch (err) {
+        console.error("Error fetching blogs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogCounts();
   }, []);
 
-  // Build image URL using our API endpoint
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "";
-    const filename = imagePath.split("/").pop();
-    return `${API}/blogs/images/${filename}`;
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return (
-    <section className="p-10 min-h-screen bg-gray-50 text-gray-900">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900">
-            Profile
-          </h1>
-          {authorName && (
-            <p className="text-lg text-gray-600 mt-2">
-              Welcome, <span className="font-semibold text-indigo-600">{authorName}</span>
-            </p>
-          )}
+    <div className="min-h-screen p-10 bg-gradient-to-br from-gray-50 to-gray-100">
+      <h1 className="text-4xl font-extrabold text-gray-900 mb-8">
+        Welcome, {authorName}
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        {/* Total Blogs */}
+        <div className="bg-blue-100 rounded-xl p-6 shadow flex flex-col items-center justify-center">
+          <h2 className="text-xl font-semibold text-blue-800">Total Blogs</h2>
+          <p className="text-5xl font-bold text-blue-900 mt-4">{totalCount}</p>
         </div>
 
-        {/* Modern Add Blog Button */}
-        <button
-          onClick={() => {
-            setEditingBlog(null);
-            setFormOpen(true);
-          }}
-          className="mt-6 md:mt-0 flex items-center gap-2 px-6 py-3 
-                     bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 
-                     text-white font-semibold rounded-full shadow-md 
-                     hover:shadow-lg transform hover:scale-105 transition-all"
-        >
-          <PlusCircle className="w-5 h-5" />
-          <span>Add Blog</span>
-        </button>
+        {/* Approved Blogs */}
+        <div className="bg-green-100 rounded-xl p-6 shadow flex flex-col items-center justify-center">
+          <h2 className="text-xl font-semibold text-green-800">Approved Blogs</h2>
+          <p className="text-5xl font-bold text-green-900 mt-4">{approvedCount}</p>
+        </div>
+
+        {/* Rejected Blogs */}
+        <div className="bg-red-100 rounded-xl p-6 shadow flex flex-col items-center justify-center">
+          <h2 className="text-xl font-semibold text-red-800">Rejected Blogs</h2>
+          <p className="text-5xl font-bold text-red-900 mt-4">{rejectedCount}</p>
+        </div>
       </div>
-
-      {/* Blogs grid */}
-      {blogs.length === 0 ? (
-        <p className="text-center text-gray-500 text-lg">No blogs yet. Create one!</p>
-      ) : (
-        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {blogs.map((b) => (
-            <div
-              key={b.id}
-              className="bg-white rounded-xl shadow hover:shadow-xl overflow-hidden 
-                         transform hover:scale-[1.02] transition-all duration-300 border border-gray-200"
-            >
-              {/* Blog image */}
-              {b.image && (
-                <div className="overflow-hidden">
-                  <img
-                    src={getImageUrl(b.image)}
-                    alt={b.title}
-                    className="w-full h-52 object-cover hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-              )}
-
-              {/* Blog content */}
-              <div className="p-5">
-                <h2 className="text-lg font-bold text-gray-800 truncate mb-2">
-                  {b.title}
-                </h2>
-                <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                  {b.content}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Blog form modal */}
-      {formOpen && (
-        <BlogForm
-          blog={editingBlog}
-          onClose={() => setFormOpen(false)}
-          onSuccess={fetchBlogs}
-        />
-      )}
-    </section>
+    </div>
   );
 }

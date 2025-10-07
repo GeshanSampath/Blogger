@@ -1,8 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [role, setRole] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
 
@@ -29,12 +30,20 @@ export default function Navbar() {
     window.dispatchEvent(new Event("storage"));
   };
 
+  // 🧭 Hide navbar for dashboard routes
+  if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/author")) {
+    return null;
+  }
+
   return (
-    <nav className="bg-[#1a1a2e] text-white p-4 flex justify-between items-center">
+    <nav className="bg-[#1a1a2e] text-white p-4 flex justify-between items-center shadow-md">
+      {/* Logo */}
       <div className="text-2xl font-bold">
-        <Link to="/">Bloger</Link>
+        <Link to="/">Blogger</Link>
       </div>
-      <ul className="flex space-x-4">
+
+      {/* Menu */}
+      <ul className="flex space-x-4 items-center">
         <li>
           <Link to="/">Home</Link>
         </li>
@@ -42,35 +51,40 @@ export default function Navbar() {
           <Link to="/about">About</Link>
         </li>
         <li>
-          <Link to="/Blogs/BlogList">Blogs</Link>
+          <Link to="/blogs">Blogs</Link>
         </li>
         <li>
           <Link to="/contact">Contact</Link>
         </li>
 
+        {/* Role-based links */}
         {loggedIn && role === "super_admin" && (
           <li>
-            <Link to="/Admin/AdminLayout">Dashboard</Link>
+            <Link to="/admin/dashboard">Dashboard</Link>
           </li>
         )}
         {loggedIn && role === "author" && (
           <li>
-            <Link to="/Author/AuthorDashboard">Profile</Link>
+            <Link to="/author/myblogs">Profile</Link>
           </li>
         )}
 
+        {/* Auth buttons */}
         {loggedIn ? (
           <li>
             <button
               onClick={handleLogout}
-              className="bg-red-500 px-3 py-1 rounded"
+              className="bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition"
             >
               Logout
             </button>
           </li>
         ) : (
           <li>
-            <Link to="/login" className="bg-blue-500 px-3 py-1 rounded">
+            <Link
+              to="/login"
+              className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition"
+            >
               Login
             </Link>
           </li>

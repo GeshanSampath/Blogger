@@ -6,7 +6,7 @@ import { useState } from "react";
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "",type: "" });
   const [status, setStatus] = useState("");
 
   async function handleSubmit(e) {
@@ -16,7 +16,7 @@ export default function Contact() {
     try {
       await axios.post(`${API}/contact`, form);
       setStatus("✅ Message sent successfully!");
-      setForm({ name: "", email: "", message: "" });
+      setForm({ name: "", email: "", message: "",type: "" });
     } catch (err) {
       console.error(err);
       setStatus("❌ Failed to send message. Try again later.");
@@ -99,6 +99,14 @@ export default function Contact() {
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full px-4 py-3 rounded-lg border border-gray-300/30 bg-white/5 text-white focus:ring-2 focus:ring-[#00adb5] outline-none"
           />
+          
+          <input type="text" 
+          placeholder="Type"
+          value={form.type}
+          onChange={(e) => setForm({...form, type: e.target.value })}
+          />
+
+
           <textarea
             rows="5"
             placeholder="Your Message"

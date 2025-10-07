@@ -4,6 +4,10 @@ import { ContactModule } from './contact/contact.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CommentsModule } from './comments/comments.module';
+import { RepliesModule } from './replies/replies.module';
+import { DashboardModule } from './dashboard/dashboard.module';   
+
 
 
 @Module({
@@ -22,7 +26,11 @@ import { AuthModule } from './auth/auth.module';
     BlogsModule,
     ContactModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    CommentsModule,
+    RepliesModule,
+    DashboardModule
+    
   ],
 
   

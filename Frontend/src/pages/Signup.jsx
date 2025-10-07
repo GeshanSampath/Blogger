@@ -5,15 +5,37 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user"); // default role
+  const [role, setRole] = useState("user");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  const validate = () => {
+    if (!name || !email || !password) {
+      setError("All fields are required");
+      return false;
+    }
+    if (name.length < 2) {
+      setError("Name must be at least 2 characters");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Invalid email format");
+      return false;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
+    if (!validate()) return;
 
+    setMessage("");
     try {
       const res = await axios.post("http://localhost:3000/auth/register", {
         name,
@@ -32,28 +54,30 @@ export default function Signup() {
           window.location.href = "/login";
         }, 2000);
       }
+
+      // Clear form fields
+      setName("");
+      setEmail("");
+      setPassword("");
+      setRole("user");
     } catch (err) {
-      console.error(err);
       setError(err.response?.data?.message || "Signup failed");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-gray-100 to-blue-50 px-4 relative overflow-hidden">
-      {/* Decorative Background */}
       <div className="absolute -top-10 -left-10 w-40 h-40 bg-green-200 rounded-full blur-3xl opacity-30"></div>
       <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-blue-300 rounded-full blur-3xl opacity-40"></div>
 
-      {/* Signup Card */}
       <div className="relative z-10 bg-white w-full max-w-md rounded-2xl shadow-2xl p-10 border border-gray-200">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-green-600 to-blue-500 bg-clip-text text-transparent">
-            Blogger 
+            Blogger
           </h1>
           <p className="text-gray-500 mt-2 text-sm">Create your account</p>
         </div>
 
-        {/* Error and Success Messages */}
         {error && (
           <div className="mb-4 p-3 text-red-700 bg-red-100 border border-red-300 rounded-lg">
             {error}
@@ -76,7 +100,9 @@ export default function Signup() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+              className={`w-full p-3 rounded-lg border ${
+                error.includes("Name") ? "border-red-400" : "border-gray-300"
+              } focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition`}
             />
           </div>
 
@@ -90,7 +116,9 @@ export default function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+              className={`w-full p-3 rounded-lg border ${
+                error.includes("email") ? "border-red-400" : "border-gray-300"
+              } focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition`}
             />
           </div>
 
@@ -104,7 +132,9 @@ export default function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition"
+              className={`w-full p-3 rounded-lg border ${
+                error.includes("Password") ? "border-red-400" : "border-gray-300"
+              } focus:ring-2 focus:ring-green-500 outline-none bg-gray-50 text-gray-900 transition`}
             />
           </div>
 
@@ -132,10 +162,7 @@ export default function Signup() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
-          <a
-            href="/login"
-            className="text-blue-600 font-semibold hover:underline"
-          >
+          <a href="/login" className="text-blue-600 font-semibold hover:underline">
             Log in
           </a>
         </p>

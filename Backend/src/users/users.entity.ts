@@ -1,7 +1,7 @@
 // src/users/users.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Blog } from '../blogs/blog.entity';
-import { Reply } from '../comments/reply.entity';
+import { Reply } from '../replies/reply.entity';
 import { Comment } from '../comments/comment.entity'; // 🔹 You forgot this import
 
 export enum UserRole {
@@ -29,6 +29,8 @@ export class User {
 
   @Column({ default: false })
   isApproved: boolean;
+
+  
 
   @OneToMany(() => Blog, (blog) => blog.author)
   blogs: Blog[];

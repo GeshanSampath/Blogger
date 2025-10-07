@@ -1,7 +1,8 @@
-import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe, Get, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -22,5 +23,19 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     const { accessToken, role } = await this.authService.login(dto);
     return { message: 'Login successful', accessToken, role };
+  }
+
+  // ✅ Add current user profile route
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Req() req: any) {
+    // req.user is set automatically by JwtStrategy.validate()
+    // We only return safe info (not password)
+    return {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+    };
   }
 }

@@ -1,40 +1,100 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Public pages
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
-
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup"; 
-import AdminLayout from "./pages/Admin/AdminLayout";
-import PendingAuthors from "./pages/Admin/PendingAuthors";
-import AdminRoute from "./routes/AdminRoute";
-import ManageBlogs from "./pages/Admin/ManageBlogs";
-import AuthorDashboard from "./pages/Author/AuthorDashboard";
+import Signup from "./pages/Signup";
 import BlogList from "./pages/Blogs/BlogList";
 import BlogDetails from "./pages/Blogs/BlogDetails";
+
+// Layouts
+import AdminLayout from "./layouts/AdminLayout";
+import AuthorLayout from "./layouts/AuthorLayout";
+
+// Admin pages
+import Dashboard from "./pages/Admin/Dashboard";
+import PendingAuthors from "./pages/Admin/PendingAuthors";
+import ManageBlogs from "./pages/Admin/ManageBlogs";
+
+// Author pages
+import AuthorDashboard from "./pages/Author/AuthorDashboard";
+import Createblog from "./pages/Author/Createblog"; 
+import Myblogs from "./pages/Author/Myblogs";
 
 
 function App() {
   return (
     <Router>
+      {/* Global navbar for public pages */}
       <Navbar />
+
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        
         <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} /> 
-        <Route path="/signup" element={<Signup />} /> 
-        <Route path="/admin/*" element={<AdminLayout />} />
-        <Route path="/admin/pending-authors" element={<PendingAuthors />} />
-        <Route path="/admin/*" element={<AdminRoute><AdminLayout /></AdminRoute>} />
-        <Route path="/admin/manage-blogs" element={<ManageBlogs />} />
-        <Route path="/Author/AuthorDashboard" element={<AuthorDashboard />} />
-        <Route path="/Blogs/BlogList" element={<BlogList />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetails />} />
-        
 
+        {/* Admin routes with layout */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminLayout>
+              <Dashboard />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/pending-authors"
+          element={
+            <AdminLayout>
+              <PendingAuthors />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/manage-blogs"
+          element={
+            <AdminLayout>
+              <ManageBlogs />
+            </AdminLayout>
+          }
+        />
+
+        {/* Author routes with layout */}
+        
+          <Route
+          path="/author/authordashboard"
+          element={
+            <AuthorLayout>
+              <AuthorDashboard />
+            </AuthorLayout>
+          }
+        />
+        
+        
+        <Route
+          path="/author/createblog"
+          element={
+            <AuthorLayout>
+              <Createblog />
+            </AuthorLayout>
+          }
+        />
+        <Route
+          path="/author/myblogs"
+          element={
+            <AuthorLayout>
+              <Myblogs />
+            </AuthorLayout>
+          }
+        />
       </Routes>
     </Router>
   );

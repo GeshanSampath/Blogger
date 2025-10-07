@@ -1,34 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(""); // <-- store error message
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/", { replace: true });
+    }
+  }, []);
+
+  // Basic validation
+  const validate = () => {
+    if (!email || !password) {
+      setError("All fields are required");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Invalid email format");
+      return false;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+    setError("");
+    return true;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(""); // clear old error first
+    if (!validate()) return;
 
+    setLoading(true);
     try {
       const res = await axios.post(`${API}/auth/login`, { email, password });
 
-      // ✅ Save token
       localStorage.setItem("token", res.data.accessToken);
       localStorage.setItem("role", res.data.role);
 
       if (onLogin) onLogin();
-
       navigate("/", { replace: true });
       window.location.reload();
     } catch (err) {
-      // 🔴 Instead of alert, show message in UI
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -50,7 +74,6 @@ export default function Login({ onLogin }) {
           <p className="text-gray-500 mt-2 text-sm">Log in to your account</p>
         </div>
 
-        {/* 🔴 Error Message Box */}
         {error && (
           <div className="mb-4 p-3 text-red-700 bg-red-100 border border-red-300 rounded-lg text-center font-medium">
             {error}
@@ -58,7 +81,6 @@ export default function Login({ onLogin }) {
         )}
 
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
-          {/* Email */}
           <div>
             <label className="text-sm font-semibold text-gray-700 block mb-1">
               Email
@@ -73,22 +95,27 @@ export default function Login({ onLogin }) {
             />
           </div>
 
-          {/* Password */}
-          <div>
+          <div className="relative">
             <label className="text-sm font-semibold text-gray-700 block mb-1">
               Password
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 text-gray-900 transition"
             />
+            <span
+              className="absolute right-3 top-[38px] cursor-pointer text-gray-500"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
 
-          {/* Forgot Password */}
+          {/* Forgot Password placeholder */}
           <div className="text-right">
             <button
               type="button"
@@ -99,7 +126,6 @@ export default function Login({ onLogin }) {
             </button>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
