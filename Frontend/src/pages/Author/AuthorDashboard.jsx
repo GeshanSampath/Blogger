@@ -1,77 +1,133 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts";
+import { FaCheckCircle, FaClock, FaFileAlt } from "react-icons/fa";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function AuthorDashboard() {
-  const [approvedCount, setApprovedCount] = useState(0);
-  const [rejectedCount, setRejectedCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [counts, setCounts] = useState({
+    totalBlogs: 0,
+    approvedBlogs: 0,
+    pendingBlogs: 0,
+  });
+
   const [loading, setLoading] = useState(true);
-  const [authorName, setAuthorName] = useState("");
+  const [authorName, setAuthorName] = useState("Author");
 
   useEffect(() => {
-    const fetchBlogCounts = async () => {
+    const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get(`${API}/blogs/author`, {
+        const res = await axios.get(`${API}/blogs/author/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const blogs = res.data;
-        setAuthorName(blogs[0]?.author?.name || "Author");
+        const data = res.data;
+        setAuthorName(data.authorName || "Author");
 
-        const approved = blogs.filter(b => b.status === "approved").length;
-        const rejected = blogs.filter(b => b.status === "rejected").length;
-
-        setApprovedCount(approved);
-        setRejectedCount(rejected);
-        setTotalCount(blogs.length);
+        setCounts({
+          totalBlogs: data.total,
+          approvedBlogs: data.approved,
+          pendingBlogs: data.pending,
+        });
       } catch (err) {
-        console.error("Error fetching blogs:", err);
+        console.error("Error fetching author stats:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlogCounts();
+    fetchStats();
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">Loading dashboard...</p>
       </div>
     );
-  }
+
+  const blogStatusData = [
+    { name: "Approved", value: counts.approvedBlogs },
+    { name: "Pending", value: counts.pendingBlogs },
+  ];
+
+  const COLORS = ["#4ade80", "#facc15"];
 
   return (
-    <div className="min-h-screen p-10 bg-gradient-to-br from-gray-50 to-gray-100">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-8">
-        Welcome, {authorName}
-      </h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navbar */}
+      <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-indigo-600">Welcome, {authorName}</h1>
+      </nav>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-        {/* Total Blogs */}
-        <div className="bg-blue-100 rounded-xl p-6 shadow flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold text-blue-800">Total Blogs</h2>
-          <p className="text-5xl font-bold text-blue-900 mt-4">{totalCount}</p>
+      {/* Main Content */}
+      <div className="p-10 space-y-10">
+        {/* Metric Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MetricCard
+            title="Total Blogs"
+            value={counts.totalBlogs}
+            icon={<FaFileAlt />}
+          />
+          <MetricCard
+            title="Approved Blogs"
+            value={counts.approvedBlogs}
+            icon={<FaCheckCircle />}
+          />
+          <MetricCard
+            title="Pending Blogs"
+            value={counts.pendingBlogs}
+            icon={<FaClock />}
+            alert={counts.pendingBlogs > 0}
+          />
         </div>
 
-        {/* Approved Blogs */}
-        <div className="bg-green-100 rounded-xl p-6 shadow flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold text-green-800">Approved Blogs</h2>
-          <p className="text-5xl font-bold text-green-900 mt-4">{approvedCount}</p>
-        </div>
-
-        {/* Rejected Blogs */}
-        <div className="bg-red-100 rounded-xl p-6 shadow flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold text-red-800">Rejected Blogs</h2>
-          <p className="text-5xl font-bold text-red-900 mt-4">{rejectedCount}</p>
+        {/* Pie Chart */}
+        <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition">
+          <h2 className="text-xl font-semibold mb-4">Blog Status</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={blogStatusData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#8884d8"
+                label
+              >
+                {blogStatusData.map((entry, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Legend />
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Metric Card Component
+function MetricCard({ title, value, icon, alert }) {
+  return (
+    <div
+      className={`bg-white shadow-lg rounded-lg p-6 text-center flex flex-col items-center justify-center space-y-2 transition hover:scale-105 ${
+        alert ? "border-2 border-yellow-400" : ""
+      }`}
+    >
+      <div className="text-3xl text-gray-700">{icon}</div>
+      <h2 className="text-gray-500 font-semibold">{title}</h2>
+      <p className={`text-3xl font-bold ${alert ? "text-yellow-500" : ""}`}>
+        {value}
+      </p>
     </div>
   );
 }

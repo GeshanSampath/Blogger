@@ -19,14 +19,14 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { BlogsService } from './blogs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
 import { GetUser } from '../auth/get-user.decorator';
-import type { Response } from 'express';
-import { existsSync } from 'fs';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '../users/users.entity';
+import { CreateBlogDto } from './dto/create-blog.dto';
+import { UpdateBlogDto } from './dto/update-blog.dto';
+import type { Response } from 'express';
+import { existsSync } from 'fs';
 
 function editFileName(req, file, callback) {
   const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -44,20 +44,27 @@ function imageFileFilter(req, file, callback) {
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 
-  // ✅ Public: approved blogs only
+  // Public: approved blogs
   @Get()
   getAll() {
     return this.blogsService.findAll();
   }
 
-  // ✅ Author: see own blogs
+  // Author: own blogs
   @UseGuards(JwtAuthGuard)
   @Get('author')
   getMine(@GetUser('id') userId: number) {
     return this.blogsService.findByAuthor(userId);
   }
 
-  // ✅ Author: create blog (defaults to PENDING)
+  // Author: stats
+  @UseGuards(JwtAuthGuard)
+  @Get('author/stats')
+  getStats(@GetUser('id') userId: number) {
+    return this.blogsService.getAuthorBlogStats(userId);
+  }
+
+  // Create blog
   @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(
@@ -78,7 +85,7 @@ export class BlogsController {
     return this.blogsService.create(dto, userId, `/uploads/blogs/${file.filename}`);
   }
 
-  // ✅ Author: update blog
+  // Update blog
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   @UseInterceptors(
@@ -100,20 +107,14 @@ export class BlogsController {
     return this.blogsService.update(id, dto, userId, imagePath);
   }
 
-  // ✅ Author: delete blog
+  // Delete blog
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number, @GetUser('id') userId: number) {
     return this.blogsService.delete(id, userId);
   }
 
-  // ✅ Public: get approved comments
-  @Get(':id/comments')
-  getComments(@Param('id', ParseIntPipe) blogId: number) {
-    return this.blogsService.getComments(blogId);
-  }
-
-  // ✅ Public: serve uploaded images
+  // Serve uploaded images
   @Get('images/:filename')
   getImage(@Param('filename') filename: string, @Res() res: Response) {
     const filePath = join(process.cwd(), 'uploads/blogs', filename);
@@ -123,7 +124,7 @@ export class BlogsController {
     return res.sendFile(filePath);
   }
 
-  // ✅ SuperAdmin: view pending blogs
+  // SuperAdmin: pending blogs
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @Get('pending')
@@ -131,7 +132,7 @@ export class BlogsController {
     return this.blogsService.findPending();
   }
 
-  // ✅ SuperAdmin: approve blog
+  // SuperAdmin: approve blog
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @Patch(':id/approve')
@@ -139,7 +140,7 @@ export class BlogsController {
     return this.blogsService.approve(id);
   }
 
-  // ✅ SuperAdmin: reject blog
+  // SuperAdmin: reject blog
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @Patch(':id/reject')

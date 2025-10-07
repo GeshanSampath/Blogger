@@ -62,7 +62,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Top Navbar */}
       <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-green-600">Blogger Admin</h1>
+        <h1 className="text-2xl font-bold text-green-600">Welcome....</h1>
         <span className="text-gray-700 font-semibold">{adminName}</span>
       </nav>
 

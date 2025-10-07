@@ -4,15 +4,18 @@ import { Repository } from 'typeorm';
 import { Blog, BlogStatus } from './blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { User } from '../users/users.entity';
 
 @Injectable()
 export class BlogsService {
   constructor(
     @InjectRepository(Blog)
     private readonly blogsRepo: Repository<Blog>,
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
   ) {}
 
-  // Public: approved blogs only
+  // Public: approved blogs
   async findAll(): Promise<Blog[]> {
     return this.blogsRepo.find({
       where: { status: BlogStatus.APPROVED },
@@ -30,23 +33,38 @@ export class BlogsService {
     });
   }
 
-  // Single blog with comments/replies
+  // Author: stats
+  async getAuthorBlogStats(userId: number) {
+    const author = await this.usersRepo.findOne({ where: { id: userId } });
+    if (!author) throw new NotFoundException('Author not found');
+
+    const [total, approved, rejected, pending] = await Promise.all([
+      this.blogsRepo.count({ where: { author: { id: userId } } }),
+      this.blogsRepo.count({ where: { author: { id: userId }, status: BlogStatus.APPROVED } }),
+      this.blogsRepo.count({ where: { author: { id: userId }, status: BlogStatus.REJECTED } }),
+      this.blogsRepo.count({ where: { author: { id: userId }, status: BlogStatus.PENDING } }),
+    ]);
+
+    return {
+      authorName: author.name,
+      total,
+      approved,
+      rejected,
+      pending,
+    };
+  }
+
+  // Single blog
   async findOne(id: number): Promise<Blog> {
     const blog = await this.blogsRepo.findOne({
       where: { id, status: BlogStatus.APPROVED },
-      relations: [
-        'author',
-        'comments',
-        'comments.user',
-        'comments.replies',
-        'comments.replies.user',
-      ],
+      relations: ['author', 'comments', 'comments.user', 'comments.replies', 'comments.replies.user'],
     });
-
     if (!blog) throw new NotFoundException(`Blog with id ${id} not found or not approved`);
     return blog;
   }
 
+  // Create
   async create(dto: CreateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
     const blog = this.blogsRepo.create({
       ...dto,
@@ -57,6 +75,7 @@ export class BlogsService {
     return this.blogsRepo.save(blog);
   }
 
+  // Update
   async update(id: number, dto: UpdateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
     const blog = await this.blogsRepo.findOne({ where: { id }, relations: ['author'] });
     if (!blog) throw new NotFoundException('Blog not found');
@@ -69,31 +88,17 @@ export class BlogsService {
     return this.blogsRepo.save(blog);
   }
 
+  // Delete
   async delete(id: number, userId: number): Promise<{ message: string }> {
     const blog = await this.blogsRepo.findOne({ where: { id }, relations: ['author'] });
     if (!blog) throw new NotFoundException('Blog not found');
     if (blog.author.id !== userId) throw new ForbiddenException('Not allowed');
+
     await this.blogsRepo.remove(blog);
     return { message: 'Blog deleted successfully' };
   }
 
-  // Get comments (top-level only, with nested replies)
-  async getComments(blogId: number) {
-    const blog = await this.blogsRepo.findOne({
-      where: { id: blogId, status: BlogStatus.APPROVED },
-      relations: [
-        'comments',
-        'comments.user',
-        'comments.replies',
-        'comments.replies.user',
-      ],
-      order: { comments: { createdAt: 'DESC' } },
-    });
-
-    if (!blog) throw new NotFoundException('Blog not found or not approved');
-    return blog.comments.filter((c) => !c.parent); // only top‑level
-  }
-
+  // Pending blogs
   async findPending(): Promise<Blog[]> {
     return this.blogsRepo.find({
       where: { status: BlogStatus.PENDING },
@@ -102,6 +107,7 @@ export class BlogsService {
     });
   }
 
+  // Approve
   async approve(id: number): Promise<Blog> {
     const blog = await this.blogsRepo.findOne({ where: { id } });
     if (!blog) throw new NotFoundException('Blog not found');
@@ -109,6 +115,7 @@ export class BlogsService {
     return this.blogsRepo.save(blog);
   }
 
+  // Reject
   async reject(id: number): Promise<{ message: string }> {
     const blog = await this.blogsRepo.findOne({ where: { id } });
     if (!blog) throw new NotFoundException('Blog not found');

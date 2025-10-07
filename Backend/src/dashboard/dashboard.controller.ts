@@ -16,8 +16,5 @@ export class DashboardController {
     return this.dashboardService.getBlogsCount();
   }
 
-  @Get('blog-trends')
-  getBlogTrends() {
-    return this.dashboardService.getBlogTrends();
-  }
+ 
 }

@@ -1,4 +1,3 @@
-// blog.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -13,6 +12,7 @@ import { Comment } from '../comments/comment.entity';
 export enum BlogStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }
 
 @Entity()
@@ -32,7 +32,7 @@ export class Blog {
   @Column({ type: 'enum', enum: BlogStatus, default: BlogStatus.PENDING })
   status: BlogStatus;
 
-  @ManyToOne(() => User, (user) => user.blogs)
+  @ManyToOne(() => User, (user) => user.blogs, { eager: false })
   author: User;
 
   @OneToMany(() => Comment, (c) => c.blog, { cascade: true })

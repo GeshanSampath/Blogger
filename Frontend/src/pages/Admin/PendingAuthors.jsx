@@ -68,7 +68,7 @@ export default function PendingAuthors() {
 
       {!loading && authors.length === 0 && (
         <p className="text-center text-green-600 font-medium">
-          ✅ All authors are approved!
+           All authors are approved!
         </p>
       )}
 
@@ -101,14 +101,14 @@ export default function PendingAuthors() {
                   className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg 
                              hover:bg-green-700 transition"
                 >
-                  Approve ✅
+                  Approve 
                 </button>
                 <button
                   onClick={() => rejectAuthor(author.id)}
                   className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg 
                              hover:bg-red-700 transition"
                 >
-                  Reject ❌
+                  Reject 
                 </button>
               </div>
             </div>
