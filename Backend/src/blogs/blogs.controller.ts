@@ -49,6 +49,8 @@ export class BlogsController {
   getAll() {
     return this.blogsService.findAll();
   }
+  
+
 
   // Author: own blogs
   @UseGuards(JwtAuthGuard)
@@ -85,34 +87,7 @@ export class BlogsController {
     return this.blogsService.create(dto, userId, `/uploads/blogs/${file.filename}`);
   }
 
-  // Update blog
-  @UseGuards(JwtAuthGuard)
-  @Put(':id')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/blogs',
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateBlogDto,
-    @UploadedFile() file: Express.Multer.File,
-    @GetUser('id') userId: number,
-  ) {
-    const imagePath = file ? `/uploads/blogs/${file.filename}` : undefined;
-    return this.blogsService.update(id, dto, userId, imagePath);
-  }
 
-  // Delete blog
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number, @GetUser('id') userId: number) {
-    return this.blogsService.delete(id, userId);
-  }
 
   // Serve uploaded images
   @Get('images/:filename')
@@ -147,4 +122,10 @@ export class BlogsController {
   reject(@Param('id', ParseIntPipe) id: number) {
     return this.blogsService.reject(id);
   }
-}
+
+  @Get(':id')
+async findOne(@Param('id', ParseIntPipe) id: number) {
+  return this.blogsService.findOne(id);
+
+  
+}}

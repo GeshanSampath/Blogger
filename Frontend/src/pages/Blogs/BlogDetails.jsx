@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function BlogDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [blog, setBlog] = useState(null);
   const [comments, setComments] = useState([]);
@@ -15,6 +14,7 @@ export default function BlogDetails() {
   const [visibleReplies, setVisibleReplies] = useState({});
   const [replyBox, setReplyBox] = useState({});
   const [loading, setLoading] = useState(true);
+  const [commentsLoading, setCommentsLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -38,61 +38,74 @@ export default function BlogDetails() {
   };
 
   const fetchBlog = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(`${API}/blogs/${id}`);
       setBlog(res.data);
+      setError("");
     } catch (err) {
-      if (err.response?.status === 404) setError("Blog not found or not approved.");
-      else setError("Failed to load blog.");
+      setError(err.response?.status === 404 ? "Blog not found or not approved." : "Failed to load blog.");
     } finally {
       setLoading(false);
     }
   };
 
   const fetchComments = async () => {
+    setCommentsLoading(true);
     try {
       const res = await axios.get(`${API}/blogs/${id}/comments`);
       setComments(res.data);
     } catch {
       setComments([]);
+    } finally {
+      setCommentsLoading(false);
     }
   };
 
-  const postComment = async (e) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-    try {
-      await axios.post(
-        `${API}/blogs/${id}/comments`,
-        { content: comment },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-      );
-      setComment("");
-      fetchComments();
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-    }
-  };
+  const postComment = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!comment.trim()) return;
+      try {
+        await axios.post(
+          `${API}/blogs/${id}/comments`,
+          { content: comment },
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
+        setComment("");
+        fetchComments();
+      } catch (err) {
+        console.error(err.response?.data || err.message);
+      }
+    },
+    [comment, id]
+  );
 
-  const postReply = async (commentId, e) => {
-    e.preventDefault();
-    if (!replyContent[commentId]?.trim()) return;
-    try {
-      await axios.post(
-        `${API}/blogs/${id}/comments/${commentId}/replies`,
-        { content: replyContent[commentId] },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-      );
-      setReplyContent((prev) => ({ ...prev, [commentId]: "" }));
-      fetchComments();
-    } catch (err) {
-      if (err.response?.status === 403) alert("Only the blog author can reply.");
-      else alert("Failed to post reply");
-      console.error(err.response?.data || err.message);
-    }
-  };
+  const postReply = useCallback(
+    async (commentId, e) => {
+      e.preventDefault();
+      const content = replyContent[commentId]?.trim();
+      if (!content) return;
 
-  if (loading) return <p className="text-center text-gray-400 mt-20">Loading...</p>;
+      try {
+        await axios.post(
+          `${API}/blogs/${id}/comments/${commentId}/replies`,
+          { content },
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
+        setReplyContent((prev) => ({ ...prev, [commentId]: "" }));
+        fetchComments();
+        setReplyBox((prev) => ({ ...prev, [commentId]: false }));
+      } catch (err) {
+        if (err.response?.status === 403) alert("Only the blog author can reply.");
+        else alert("Failed to post reply");
+        console.error(err.response?.data || err.message);
+      }
+    },
+    [id, replyContent]
+  );
+
+  if (loading) return <p className="text-center text-gray-400 mt-20">Loading blog...</p>;
   if (error) return <p className="text-center text-red-500 mt-20">{error}</p>;
 
   return (
@@ -121,82 +134,83 @@ export default function BlogDetails() {
             Comments ({comments.length})
           </h2>
 
-          {comments.length === 0 && <p className="text-gray-400">No comments yet. Be the first!</p>}
-
-          <ul className="space-y-5">
-            {comments.map((c) => (
-              <li key={c.id}>
-                {/* Comment */}
-                <div className="bg-white/10 p-4 rounded-xl hover:bg-white/20 transition">
-                  <p className="font-semibold text-indigo-300">{c.user?.name || "Anonymous"}</p>
-                  <p className="text-gray-200">{c.content}</p>
-                </div>
-
-                {/* Reply button – only blog author */}
-                {currentUser && +blog.author.id === +currentUser.id && (
-                  <button
-                    onClick={() =>
-                      setReplyBox((prev) => ({ ...prev, [c.id]: !prev[c.id] }))
-                    }
-                    className="text-xs text-pink-400 hover:underline mt-2 ml-2"
-                  >
-                    {replyBox[c.id] ? "Cancel Reply" : "Reply"}
-                  </button>
-                )}
-
-                {/* Replies List */}
-                {c.replies?.length > 0 && (
-                  <div className="mt-2 ml-6">
-                    <button
-                      onClick={() =>
-                        setVisibleReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))
-                      }
-                      className="text-xs text-pink-400 hover:underline"
-                    >
-                      {visibleReplies[c.id]
-                        ? "Hide replies"
-                        : `View replies (${c.replies.length})`}
-                    </button>
-
-                    {visibleReplies[c.id] && (
-                      <ul className="mt-2 space-y-2">
-                        {c.replies.map((r) => (
-                          <li key={r.id} className="bg-white/5 p-3 rounded-lg ml-4">
-                            <p className="font-semibold text-indigo-300">{r.user?.name}</p>
-                            <p className="text-gray-300">{r.content}</p>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+          {commentsLoading ? (
+            <p className="text-gray-400">Loading comments...</p>
+          ) : comments.length === 0 ? (
+            <p className="text-gray-400">No comments yet. Be the first!</p>
+          ) : (
+            <ul className="space-y-5">
+              {comments.map((c) => (
+                <li key={c.id}>
+                  <div className="bg-white/10 p-4 rounded-xl hover:bg-white/20 transition">
+                    <p className="font-semibold text-indigo-300">{c.user?.name || "Anonymous"}</p>
+                    <p className="text-gray-200">{c.content}</p>
                   </div>
-                )}
 
-                {/* Reply form */}
-                {replyBox[c.id] && (
-                  <form
-                    onSubmit={(e) => postReply(c.id, e)}
-                    className="mt-2 flex gap-2 ml-6"
-                  >
-                    <input
-                      type="text"
-                      placeholder="Write a reply..."
-                      className="flex-1 p-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
-                      value={replyContent[c.id] || ""}
-                      onChange={(e) =>
-                        setReplyContent({ ...replyContent, [c.id]: e.target.value })
-                      }
-                    />
+                  {/* Reply button */}
+                  {currentUser && +blog.author.id === +currentUser.id && (
                     <button
-                      type="submit"
-                      className="px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white font-semibold transition"
+                      onClick={() => setReplyBox((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}
+                      className="text-xs text-pink-400 hover:underline mt-2 ml-2"
                     >
-                      Reply
+                      {replyBox[c.id] ? "Cancel Reply" : "Reply"}
                     </button>
-                  </form>
-                )}
-              </li>
-            ))}
-          </ul>
+                  )}
+
+                  {/* Replies List */}
+                  {c.replies?.length > 0 && (
+                    <div className="mt-2 ml-6">
+                      <button
+                        onClick={() =>
+                          setVisibleReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))
+                        }
+                        className="text-xs text-pink-400 hover:underline"
+                      >
+                        {visibleReplies[c.id]
+                          ? "Hide replies"
+                          : `View replies (${c.replies.length})`}
+                      </button>
+
+                      {visibleReplies[c.id] && (
+                        <ul className="mt-2 space-y-2">
+                          {c.replies.map((r) => (
+                            <li key={r.id} className="bg-white/5 p-3 rounded-lg ml-4">
+                              <p className="font-semibold text-indigo-300">{r.user?.name}</p>
+                              <p className="text-gray-300">{r.content}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Reply Form */}
+                  {replyBox[c.id] && (
+                    <form
+                      onSubmit={(e) => postReply(c.id, e)}
+                      className="mt-2 flex gap-2 ml-6"
+                    >
+                      <input
+                        type="text"
+                        placeholder="Write a reply..."
+                        className="flex-1 p-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        value={replyContent[c.id] || ""}
+                        onChange={(e) =>
+                          setReplyContent({ ...replyContent, [c.id]: e.target.value })
+                        }
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white font-semibold transition"
+                      >
+                        Reply
+                      </button>
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
 
           {/* Add comment */}
           {currentUser && (
@@ -206,11 +220,11 @@ export default function BlogDetails() {
                 placeholder="Write a comment..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="flex-1 p-3 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                className="flex-1 p-3 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
               <button
                 type="submit"
-                disabled={!comment}
+                disabled={!comment.trim()}
                 className="px-6 py-2 bg-pink-600 hover:bg-pink-700 rounded-lg text-white font-semibold transition"
               >
                 Comment
@@ -218,8 +232,6 @@ export default function BlogDetails() {
             </form>
           )}
         </div>
-
-        
       </div>
     </section>
   );

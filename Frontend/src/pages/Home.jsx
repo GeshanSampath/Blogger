@@ -19,19 +19,10 @@ export default function Home() {
     }
   };
 
-  // Fetch categories
-  const fetchCategories = async () => {
-    try {
-      const res = await axios.get(`${API}/categories`);
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
-
+  
   useEffect(() => {
     fetchTrendingBlogs();
-    fetchCategories();
+    
   }, []);
 
   return (
@@ -119,25 +110,7 @@ export default function Home() {
         )}
       </section>
 
-      {/* Categories Section */}
-      {categories.length > 0 && (
-        <section className="bg-[#1a1a2e] py-20 px-6 md:px-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-white">
-            Browse by Categories
-          </h2>
-          <div className="flex flex-wrap justify-center gap-6">
-            {categories.map((cat) => (
-              <motion.div
-                key={cat.id}
-                className="bg-[#16213e] px-6 py-4 rounded-full cursor-pointer hover:bg-[#00adb5] transition-colors"
-                whileHover={{ scale: 1.05 }}
-              >
-                {cat.name}
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      )}
+     
 
       {/* Call to Action / About Section */}
       <section className="bg-[#1a1a2e] py-20 px-6 md:px-12 text-center">

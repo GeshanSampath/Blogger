@@ -7,8 +7,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Myblogs() {
   const [blogs, setBlogs] = useState([]);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState(null);
+ 
   const [authorName, setAuthorName] = useState("");
 
   // Fetch blogs of logged-in author
