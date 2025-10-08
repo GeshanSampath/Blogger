@@ -4,7 +4,6 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../users/users.entity';
 import { Comment } from '../comments/comment.entity';
@@ -14,18 +13,15 @@ export class Reply {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'longtext' })
   content: string;
+
+  @ManyToOne(() => User, (user) => user.id, { eager: true })
+  user: User;
 
   @ManyToOne(() => Comment, (comment) => comment.replies, { onDelete: 'CASCADE' })
   comment: Comment;
 
-  @ManyToOne(() => User, (user) => user.replies, { eager: true })
-  user: User;
-
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

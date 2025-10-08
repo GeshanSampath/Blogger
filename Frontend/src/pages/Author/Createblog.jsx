@@ -1,4 +1,3 @@
-// src/pages/Author/CreateBlog.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -8,9 +7,12 @@ export default function CreateBlog({ blog, onSuccess }) {
   const [title, setTitle] = useState(blog?.title || "");
   const [content, setContent] = useState(blog?.content || "");
   const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(blog?.image ? `${API}/blogs/images/${blog.image.split("/").pop()}` : "");
+  const [imagePreview, setImagePreview] = useState(
+    blog?.image ? `${API}/blogs/images/${blog.image.split("/").pop()}` : ""
+  );
   const [loading, setLoading] = useState(false);
   const [authorName, setAuthorName] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // ✅ success message state
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -20,7 +22,8 @@ export default function CreateBlog({ blog, onSuccess }) {
         const res = await axios.get(`${API}/blogs/author`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.data.length > 0) setAuthorName(res.data[0].author?.name || "Author");
+        if (res.data.length > 0)
+          setAuthorName(res.data[0].author?.name || "Author");
       } catch (err) {
         console.error(err);
       }
@@ -44,6 +47,7 @@ export default function CreateBlog({ blog, onSuccess }) {
     e.preventDefault();
     if (!title || !content) return alert("Title and content are required");
     setLoading(true);
+    setSuccessMessage("");
 
     try {
       const token = localStorage.getItem("token");
@@ -64,7 +68,15 @@ export default function CreateBlog({ blog, onSuccess }) {
         });
       }
 
+      //  Show success message and remove after 3 seconds
+      setSuccessMessage(
+        " Blog submitted successfully! Waiting for admin approval."
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+
       if (onSuccess) onSuccess();
+
+      // clear form
       setTitle("");
       setContent("");
       setImage(null);
@@ -88,6 +100,13 @@ export default function CreateBlog({ blog, onSuccess }) {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-xl shadow-md max-w-3xl mx-auto flex flex-col gap-4"
       >
+        {/* Success Message on top */}
+        {successMessage && (
+          <div className="bg-green-100 text-green-800 border border-green-300 px-4 py-3 rounded-lg text-center transition-all duration-500">
+            {successMessage}
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Blog Title"
@@ -113,7 +132,9 @@ export default function CreateBlog({ blog, onSuccess }) {
               className="w-full h-60 object-cover rounded-lg mx-auto"
             />
           ) : (
-            <p className="text-gray-500">Drag & drop an image here or click to select</p>
+            <p className="text-gray-500">
+              Drag & drop an image here or click to select
+            </p>
           )}
           <input
             type="file"

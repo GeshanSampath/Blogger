@@ -2,42 +2,59 @@ import {
   Controller,
   Get,
   Post,
-  Param,
   Body,
-  ParseIntPipe,
+  Param,
   Req,
+  UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateReplyDto } from '../replies/dto/create-reply.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from '../users/users.entity';
+
+interface AuthRequest extends Request {
+  user?: User;
+}
 
 @Controller('blogs/:blogId/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  // GET /blogs/:blogId/comments
   @Get()
-  getComments(@Param('blogId', ParseIntPipe) blogId: number) {
-    return this.commentsService.getComments(blogId);
+  async getComments(@Param('blogId') blogId: string) {
+    return this.commentsService.getCommentsWithReplies(+blogId);
   }
 
-  // POST /blogs/:blogId/comments
+  @UseGuards(JwtAuthGuard)
   @Post()
-  addComment(
-    @Param('blogId', ParseIntPipe) blogId: number,
+  async createComment(
+    @Param('blogId') blogId: string,
     @Body() dto: CreateCommentDto,
-    @Req() req: any,
+    @Req() req: AuthRequest,
   ) {
-    return this.commentsService.addComment(blogId, dto, req.user?.id ?? 1);
+    if (!req.user) throw new UnauthorizedException();
+    return this.commentsService.createComment(+blogId, req.user.id, dto);
   }
 
-  // POST /blogs/:blogId/comments/:commentId/replies
+  @UseGuards(JwtAuthGuard)
   @Post(':commentId/replies')
-  addReply(
-    @Param('blogId', ParseIntPipe) blogId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() dto: CreateCommentDto,
-    @Req() req: any,
+  async createReply(
+    @Param('blogId') blogId: string,
+    @Param('commentId') commentId: string,
+    @Body() dto: CreateReplyDto,
+    @Req() req: AuthRequest,
   ) {
-    return this.commentsService.addReply(blogId, commentId, dto, req.user?.id ?? 1);
+    if (!req.user) throw new UnauthorizedException();
+
+    const isAuthor = await this.commentsService.isBlogAuthor(
+      +blogId,
+      req.user.id,
+    );
+    if (!isAuthor) throw new UnauthorizedException('Only blog author can reply');
+
+    return this.commentsService.createReply(+commentId, req.user.id, dto);
   }
 }

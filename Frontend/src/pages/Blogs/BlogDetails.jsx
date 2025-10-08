@@ -33,7 +33,7 @@ export default function BlogDetails() {
       });
       setCurrentUser(res.data);
     } catch (err) {
-      console.error("Error fetching current user:", err);
+      console.error(err);
     }
   };
 
@@ -42,11 +42,8 @@ export default function BlogDetails() {
       const res = await axios.get(`${API}/blogs/${id}`);
       setBlog(res.data);
     } catch (err) {
-      if (err.response?.status === 404) {
-        setError("Blog not found or not approved.");
-      } else {
-        setError("Failed to load blog.");
-      }
+      if (err.response?.status === 404) setError("Blog not found or not approved.");
+      else setError("Failed to load blog.");
     } finally {
       setLoading(false);
     }
@@ -73,7 +70,7 @@ export default function BlogDetails() {
       setComment("");
       fetchComments();
     } catch (err) {
-      console.error("Error posting comment:", err.response?.data || err.message);
+      console.error(err.response?.data || err.message);
     }
   };
 
@@ -89,59 +86,59 @@ export default function BlogDetails() {
       setReplyContent((prev) => ({ ...prev, [commentId]: "" }));
       fetchComments();
     } catch (err) {
-      if (err.response?.status === 403) {
-        alert("Only the blog author can reply to comments.");
-      } else {
-        alert("Failed to post reply");
-      }
-      console.error("Error posting reply:", err.response?.data || err.message);
+      if (err.response?.status === 403) alert("Only the blog author can reply.");
+      else alert("Failed to post reply");
+      console.error(err.response?.data || err.message);
     }
   };
 
-  if (loading) return <p className="text-center text-gray-400">Loading...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (loading) return <p className="text-center text-gray-400 mt-20">Loading...</p>;
+  if (error) return <p className="text-center text-red-500 mt-20">{error}</p>;
 
   return (
-    <section className="p-10 bg-gray-900 text-white min-h-screen">
-      <div className="max-w-3xl mx-auto">
+    <section className="p-6 md:p-10 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen">
+      <div className="max-w-4xl mx-auto mt-32">
+        {/* Blog Header */}
         {blog?.image && (
           <img
             src={`${API}/blogs/images/${blog.image.split("/").pop()}`}
             alt={blog.title}
-            className="w-full h-56 object-cover rounded-lg mb-6"
+            className="w-full h-64 md:h-80 object-cover rounded-xl shadow-lg mb-6"
           />
         )}
-        <h1 className="text-4xl font-bold mb-2">{blog?.title}</h1>
-        <p className="text-indigo-300 mb-6">By {blog?.author?.name}</p>
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-2 tracking-wide">{blog?.title}</h1>
+        <p className="text-indigo-300 mb-6 text-sm md:text-base">
+          By <span className="font-semibold">{blog?.author?.name}</span>
+        </p>
         <article
-          className="text-gray-200 leading-relaxed"
+          className="text-gray-200 leading-relaxed prose prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: blog?.content }}
         />
 
-        <div className="mt-12 p-6 rounded-xl bg-gray-800 shadow-lg">
+        {/* Comments Section */}
+        <div className="mt-12 p-6 rounded-2xl bg-gray-800 shadow-2xl">
           <h2 className="text-2xl font-semibold mb-6 border-b border-gray-700 pb-2">
             Comments ({comments.length})
           </h2>
 
-          {comments.length === 0 && (
-            <p className="text-gray-400">No comments yet. Be the first!</p>
-          )}
+          {comments.length === 0 && <p className="text-gray-400">No comments yet. Be the first!</p>}
 
           <ul className="space-y-5">
             {comments.map((c) => (
               <li key={c.id}>
-                <div className="bg-white/10 p-3 rounded-lg">
-                  <p className="font-semibold">{c.user?.name || "Anonymous"}</p>
+                {/* Comment */}
+                <div className="bg-white/10 p-4 rounded-xl hover:bg-white/20 transition">
+                  <p className="font-semibold text-indigo-300">{c.user?.name || "Anonymous"}</p>
                   <p className="text-gray-200">{c.content}</p>
                 </div>
 
-                {/* Reply button only for blog author */}
+                {/* Reply button – only blog author */}
                 {currentUser && +blog.author.id === +currentUser.id && (
                   <button
                     onClick={() =>
                       setReplyBox((prev) => ({ ...prev, [c.id]: !prev[c.id] }))
                     }
-                    className="text-xs text-indigo-400 hover:underline mt-2"
+                    className="text-xs text-pink-400 hover:underline mt-2 ml-2"
                   >
                     {replyBox[c.id] ? "Cancel Reply" : "Reply"}
                   </button>
@@ -149,15 +146,12 @@ export default function BlogDetails() {
 
                 {/* Replies List */}
                 {c.replies?.length > 0 && (
-                  <div className="mt-2 ml-4">
+                  <div className="mt-2 ml-6">
                     <button
                       onClick={() =>
-                        setVisibleReplies((prev) => ({
-                          ...prev,
-                          [c.id]: !prev[c.id],
-                        }))
+                        setVisibleReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))
                       }
-                      className="text-xs text-indigo-400 hover:underline"
+                      className="text-xs text-pink-400 hover:underline"
                     >
                       {visibleReplies[c.id]
                         ? "Hide replies"
@@ -167,11 +161,8 @@ export default function BlogDetails() {
                     {visibleReplies[c.id] && (
                       <ul className="mt-2 space-y-2">
                         {c.replies.map((r) => (
-                          <li
-                            key={r.id}
-                            className="bg-white/5 p-2 rounded-lg ml-4"
-                          >
-                            <p className="font-semibold">{r.user?.name}</p>
+                          <li key={r.id} className="bg-white/5 p-3 rounded-lg ml-4">
+                            <p className="font-semibold text-indigo-300">{r.user?.name}</p>
                             <p className="text-gray-300">{r.content}</p>
                           </li>
                         ))}
@@ -189,18 +180,15 @@ export default function BlogDetails() {
                     <input
                       type="text"
                       placeholder="Write a reply..."
-                      className="flex-1 p-2 rounded-lg text-black"
+                      className="flex-1 p-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-pink-500"
                       value={replyContent[c.id] || ""}
                       onChange={(e) =>
-                        setReplyContent({
-                          ...replyContent,
-                          [c.id]: e.target.value,
-                        })
+                        setReplyContent({ ...replyContent, [c.id]: e.target.value })
                       }
                     />
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-indigo-600 rounded-lg text-white"
+                      className="px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg text-white font-semibold transition"
                     >
                       Reply
                     </button>
@@ -212,18 +200,18 @@ export default function BlogDetails() {
 
           {/* Add comment */}
           {currentUser && (
-            <form onSubmit={postComment} className="mt-8 flex gap-3">
+            <form onSubmit={postComment} className="mt-8 flex gap-3 flex-col md:flex-row">
               <input
                 type="text"
                 placeholder="Write a comment..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="flex-1 p-3 text-black rounded-lg"
+                className="flex-1 p-3 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
               <button
                 type="submit"
                 disabled={!comment}
-                className="px-6 py-2 bg-pink-600 rounded-lg text-white"
+                className="px-6 py-2 bg-pink-600 hover:bg-pink-700 rounded-lg text-white font-semibold transition"
               >
                 Comment
               </button>
@@ -231,12 +219,7 @@ export default function BlogDetails() {
           )}
         </div>
 
-        <button
-          onClick={() => navigate("/")}
-          className="mt-8 text-indigo-400 hover:underline"
-        >
-          ← Back to Blogs
-        </button>
+        
       </div>
     </section>
   );

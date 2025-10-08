@@ -1,4 +1,3 @@
-// src/comments/comment.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,6 +8,7 @@ import {
 } from 'typeorm';
 import { Blog } from '../blogs/blog.entity';
 import { User } from '../users/users.entity';
+import { Reply } from '../replies/reply.entity';
 
 @Entity()
 export class Comment {
@@ -18,22 +18,15 @@ export class Comment {
   @Column()
   content: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  // User who wrote the comment
-  @ManyToOne(() => User, (user) => user.comments, { eager: true })
-  user: User;
-
-  // Blog the comment belongs to
   @ManyToOne(() => Blog, (blog) => blog.comments, { onDelete: 'CASCADE' })
   blog: Blog;
 
-  // Replies to this comment
-  @OneToMany(() => Comment, (reply) => reply.parent, { cascade: true })
-  replies: Comment[];
+  @ManyToOne(() => User, { eager: true })
+  user: User;
 
-  // If this is a reply, point to parent
-  @ManyToOne(() => Comment, (comment) => comment.replies, { nullable: true })
-  parent: Comment;
+  @OneToMany(() => Reply, (r) => r.comment, { cascade: true })
+  replies: Reply[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

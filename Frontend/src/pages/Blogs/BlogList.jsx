@@ -25,7 +25,7 @@ export default function BlogList() {
     }
   };
 
-  // ✅ Consistent image URL builder (like Dashboard)
+  //  Consistent image URL builder (like Dashboard)
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
     const filename = imagePath.split("/").pop();
@@ -33,7 +33,7 @@ export default function BlogList() {
   };
 
   return (
-    <section className="p-10 bg-gray-50 text-gray-900 min-h-screen">
+    <section className="p-10 bg-gray-50 text-gray-900 min-h-screen mt-10">
       <h1 className="text-4xl font-bold mb-12 text-center text-indigo-700">
         Latest Blogs
       </h1>

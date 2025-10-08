@@ -32,7 +32,7 @@ export class Blog {
   @Column({ type: 'enum', enum: BlogStatus, default: BlogStatus.PENDING })
   status: BlogStatus;
 
-  @ManyToOne(() => User, (user) => user.blogs, { eager: false })
+  @ManyToOne(() => User, (user) => user.blogs, { eager: true })
   author: User;
 
   @OneToMany(() => Comment, (c) => c.blog, { cascade: true })

@@ -1,69 +1,75 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './comment.entity';
-import { Blog } from '../blogs/blog.entity';
+import { Blog, BlogStatus } from '../blogs/blog.entity';
+import { User } from '../users/users.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateReplyDto } from '../replies/dto/create-reply.dto';
+import { Reply } from '../replies/reply.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectRepository(Comment)
-    private readonly commentsRepo: Repository<Comment>,
+    private commentRepository: Repository<Comment>,
+
     @InjectRepository(Blog)
-    private readonly blogsRepo: Repository<Blog>,
+    private blogRepository: Repository<Blog>,
+
+    @InjectRepository(Reply)
+    private replyRepository: Repository<Reply>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
-  async getComments(blogId: number): Promise<Comment[]> {
-    const blog = await this.blogsRepo.findOne({
-      where: { id: blogId },
-      relations: [
-        'comments',
-        'comments.user',
-        'comments.replies',
-        'comments.replies.user',
-        'author',
-      ],
+  async getCommentsWithReplies(blogId: number): Promise<Comment[]> {
+    return this.commentRepository.find({
+      where: { blog: { id: blogId } },
+      relations: ['user', 'replies', 'replies.user'],
+      order: { createdAt: 'ASC' },
     });
-    if (!blog) throw new NotFoundException('Blog not found');
-
-    return blog.comments.filter((c) => !c.parent);
   }
 
-  async addComment(blogId: number, dto: CreateCommentDto, userId: number): Promise<Comment> {
-    const blog = await this.blogsRepo.findOne({ where: { id: blogId } });
-    if (!blog) throw new NotFoundException('Blog not found');
-
-    const comment = this.commentsRepo.create({
-      content: dto.content,
-      blog,
-      user: { id: userId } as any,
-    });
-    return this.commentsRepo.save(comment);
-  }
-
-  async addReply(blogId: number, commentId: number, dto: CreateCommentDto, userId: number): Promise<Comment> {
-    const blog = await this.blogsRepo.findOne({
-      where: { id: blogId },
+  async isBlogAuthor(blogId: number, userId: number): Promise<boolean> {
+    const blog = await this.blogRepository.findOne({
+      where: { id: blogId, status: BlogStatus.APPROVED },
       relations: ['author'],
     });
     if (!blog) throw new NotFoundException('Blog not found');
+    return blog.author.id === userId;
+  }
 
-    console.log("Author ID:", blog.author.id, "User ID:", userId);
+  async createComment(blogId: number, userId: number, dto: CreateCommentDto): Promise<Comment> {
+    const blog = await this.blogRepository.findOne({ where: { id: blogId, status: BlogStatus.APPROVED } });
+    if (!blog) throw new NotFoundException('Blog not found');
 
-    if (+blog.author.id !== +userId) {
-      throw new ForbiddenException('Only the blog author can reply to comments.');
-    }
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
 
-    const parent = await this.commentsRepo.findOne({ where: { id: commentId } });
-    if (!parent) throw new NotFoundException('Parent comment not found');
-
-    const reply = this.commentsRepo.create({
+    const comment = this.commentRepository.create({
       content: dto.content,
       blog,
-      parent,
-      user: { id: userId } as any,
+      user,
     });
-    return this.commentsRepo.save(reply);
+
+    return this.commentRepository.save(comment);
+  }
+
+  async createReply(commentId: number, userId: number, dto: CreateReplyDto): Promise<Reply> {
+    const comment = await this.commentRepository.findOne({ where: { id: commentId } });
+    if (!comment) throw new NotFoundException('Comment not found');
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const reply = this.replyRepository.create({
+      content: dto.content,
+      comment,
+      user,
+    });
+
+    return this.replyRepository.save(reply);
   }
 }

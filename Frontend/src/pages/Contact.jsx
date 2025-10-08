@@ -24,12 +24,12 @@ export default function Contact() {
   }
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-[#0f3460] via-[#16213e] to-[#1a1a2e] text-white py-20 px-6 overflow-hidden">
+    <section className="relative min-h-screen bg-gradient-to-br from-[#0f3460] via-[#16213e] to-[#1a1a2e] text-white py-20 px-6 overflow-hidden ">
       {/* Background glow effects */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,173,181,0.3),transparent_50%)]"></div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.05),transparent_60%)]"></div>
 
-      <div className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start">
+      <div className="relative z-10 max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start mt-32">
         {/* Left Side - Contact Info */}
         <motion.div
           initial={{ x: -50, opacity: 0 }}

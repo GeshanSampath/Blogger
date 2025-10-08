@@ -6,6 +6,7 @@ export default function Navbar() {
   const location = useLocation();
   const [role, setRole] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const checkLogin = () => {
@@ -17,8 +18,17 @@ export default function Navbar() {
 
     checkLogin();
     window.addEventListener("storage", checkLogin);
-
     return () => window.removeEventListener("storage", checkLogin);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) setScrolled(true);
+      else setScrolled(false);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
@@ -30,42 +40,84 @@ export default function Navbar() {
     window.dispatchEvent(new Event("storage"));
   };
 
-  // 🧭 Hide navbar for dashboard routes
-  if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/author")) {
-    return null;
-  }
+  // Hide navbar for dashboard routes
+  if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/author")) return null;
 
   return (
-    <nav className="bg-[#1a1a2e] text-white p-4 flex justify-between items-center shadow-md">
+    <nav
+      className={`fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center shadow-lg transition-all duration-300 ${
+        scrolled
+          ? "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white shadow-2xl"
+          : "bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-500 text-white"
+      }`}
+    >
       {/* Logo */}
-      <div className="text-2xl font-bold">
+      <div className="text-2xl font-extrabold tracking-wider drop-shadow-lg">
         <Link to="/">Blogger</Link>
       </div>
 
       {/* Menu */}
-      <ul className="flex space-x-4 items-center">
+      <ul className="flex space-x-6 items-center font-medium">
         <li>
-          <Link to="/">Home</Link>
+          <Link
+            to="/"
+            className={`hover:text-yellow-300 transition-colors duration-300 ${
+              scrolled ? "hover:text-yellow-400" : ""
+            }`}
+          >
+            Home
+          </Link>
         </li>
         <li>
-          <Link to="/about">About</Link>
+          <Link
+            to="/about"
+            className={`hover:text-yellow-300 transition-colors duration-300 ${
+              scrolled ? "hover:text-yellow-400" : ""
+            }`}
+          >
+            About
+          </Link>
         </li>
         <li>
-          <Link to="/blogs">Blogs</Link>
+          <Link
+            to="/blogs"
+            className={`hover:text-yellow-300 transition-colors duration-300 ${
+              scrolled ? "hover:text-yellow-400" : ""
+            }`}
+          >
+            Blogs
+          </Link>
         </li>
         <li>
-          <Link to="/contact">Contact</Link>
+          <Link
+            to="/contact"
+            className={`hover:text-yellow-300 transition-colors duration-300 ${
+              scrolled ? "hover:text-yellow-400" : ""
+            }`}
+          >
+            Contact
+          </Link>
         </li>
 
         {/* Role-based links */}
         {loggedIn && role === "super_admin" && (
           <li>
-            <Link to="/admin/dashboard">Dashboard</Link>
+            <Link
+              to="/admin/dashboard"
+              className="hover:text-yellow-300 transition-colors duration-300"
+            >
+              Dashboard
+            </Link>
           </li>
         )}
         {loggedIn && role === "author" && (
           <li>
-            <Link to="/author/myblogs">Profile</Link>
+            <Link
+              to="/author/authordashboard"
+              className="hover:text-yellow-300 transition-colors duration-300"
+            >
+              Profile
+            </Link>
           </li>
         )}
 
@@ -74,7 +126,7 @@ export default function Navbar() {
           <li>
             <button
               onClick={handleLogout}
-              className="bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition"
+              className="bg-red-500 hover:bg-red-600 px-4 py-1 rounded-lg font-semibold transition-colors duration-300 shadow-md"
             >
               Logout
             </button>
@@ -83,7 +135,7 @@ export default function Navbar() {
           <li>
             <Link
               to="/login"
-              className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition"
+              className="bg-green-400 hover:bg-green-500 px-4 py-1 rounded-lg font-semibold transition-colors duration-300 shadow-md"
             >
               Login
             </Link>
