@@ -35,6 +35,9 @@ export class Blog {
   @ManyToOne(() => User, (user) => user.blogs, { eager: true })
   author: User;
 
+  @Column({ default: 0 })
+  views: number;
+
   @OneToMany(() => Comment, (c) => c.blog, { cascade: true })
   comments: Comment[];
 

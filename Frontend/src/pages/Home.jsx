@@ -1,29 +1,38 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Home() {
   const [trendingBlogs, setTrendingBlogs] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
-  // Fetch top 3 trending blogs
+  // Fetch top 3 trending blogs (most views)
   const fetchTrendingBlogs = async () => {
     try {
-      const res = await axios.get(`${API}/blogs`);
-      setTrendingBlogs(res.data.slice(0, 3)); // latest 3
+      const res = await axios.get(`${API}/blogs/trending`); // Backend endpoint for trending
+      setTrendingBlogs(res.data);
     } catch (err) {
       console.error("Error fetching trending blogs:", err);
     }
   };
 
-  
   useEffect(() => {
     fetchTrendingBlogs();
-    
   }, []);
+
+  // Handle clicking a blog: increment views and navigate
+  const handleViewBlog = async (blogId) => {
+    try {
+      await axios.patch(`${API}/blogs/${blogId}/increment-view`);
+    } catch (err) {
+      console.error("Failed to increment views:", err);
+    } finally {
+      navigate(`/blogs/${blogId}`);
+    }
+  };
 
   return (
     <main className="text-white">
@@ -80,7 +89,8 @@ export default function Home() {
             {trendingBlogs.map((blog) => (
               <motion.div
                 key={blog.id}
-                className="bg-[#16213e] rounded-2xl overflow-hidden shadow-lg cursor-pointer group"
+                onClick={() => handleViewBlog(blog.id)} // increment views only once
+                className="bg-[#16213e] rounded-2xl overflow-hidden shadow-lg cursor-pointer group hover:shadow-[#00adb5]/20 transition-all"
                 whileHover={{ scale: 1.03 }}
               >
                 {blog.image && (
@@ -97,7 +107,9 @@ export default function Home() {
                     {blog.title}
                   </h3>
                   <p className="text-gray-300 mb-4 line-clamp-3">
-                    {blog.content ? blog.content.replace(/<[^>]+>/g, "").slice(0, 120) + "..." : "No content"}
+                    {blog.content
+                      ? blog.content.replace(/<[^>]+>/g, "").slice(0, 120) + "..."
+                      : "No content"}
                   </p>
                   <p className="text-sm text-gray-500">
                     By <span className="text-[#00adb5]">{blog.author?.name}</span> |{" "}
@@ -109,8 +121,6 @@ export default function Home() {
           </div>
         )}
       </section>
-
-     
 
       {/* Call to Action / About Section */}
       <section className="bg-[#1a1a2e] py-20 px-6 md:px-12 text-center">

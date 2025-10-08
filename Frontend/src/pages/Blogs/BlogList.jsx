@@ -17,15 +17,24 @@ export default function BlogList() {
 
   const fetchBlogs = async () => {
     try {
-      // Backend already filters APPROVED blogs
-      const res = await axios.get(`${API}/blogs`);
+      const res = await axios.get(`${API}/blogs`); // only APPROVED blogs
       setBlogs(res.data);
     } catch (err) {
       console.error("Error fetching blogs:", err);
     }
   };
 
-  //  Consistent image URL builder (like Dashboard)
+  // Handle blog click: increment view once, then navigate
+  const handleBlogClick = async (blogId) => {
+    try {
+      await axios.patch(`${API}/blogs/${blogId}/increment-view`);
+    } catch (err) {
+      console.error("Failed to increment view:", err);
+    } finally {
+      navigate(`/blogs/${blogId}`);
+    }
+  };
+
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
     const filename = imagePath.split("/").pop();
@@ -46,7 +55,7 @@ export default function BlogList() {
                       border border-gray-200 hover:shadow-xl 
                       transform hover:scale-[1.02] transition-all duration-300 cursor-pointer"
             whileHover={{ y: -6 }}
-            onClick={() => navigate(`/blogs/${blog.id}`)}
+            onClick={() => handleBlogClick(blog.id)} // only here
           >
             {/* Blog Image */}
             {blog.image && (

@@ -12,7 +12,7 @@ export default function CreateBlog({ blog, onSuccess }) {
   );
   const [loading, setLoading] = useState(false);
   const [authorName, setAuthorName] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // ✅ success message state
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -68,10 +68,7 @@ export default function CreateBlog({ blog, onSuccess }) {
         });
       }
 
-      //  Show success message and remove after 3 seconds
-      setSuccessMessage(
-        " Blog submitted successfully! Waiting for admin approval."
-      );
+      setSuccessMessage("✅ Blog submitted successfully! Waiting for admin approval.");
       setTimeout(() => setSuccessMessage(""), 3000);
 
       if (onSuccess) onSuccess();
@@ -90,68 +87,111 @@ export default function CreateBlog({ blog, onSuccess }) {
   };
 
   return (
-    <div className="min-h-screen p-10 bg-gradient-to-br from-gray-50 to-gray-100">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-        Welcome, {authorName}
-      </h1>
-      <p className="text-gray-600 mb-8">Add or edit your blogs below</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-100 flex items-center justify-center p-8">
+      <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-10 border border-gray-100">
+        <div className="mb-6 text-center">
+          <h1 className="text-4xl font-extrabold text-indigo-700 mb-2">
+            Welcome, {authorName}
+          </h1>
+          <p className="text-gray-500">Add or edit your blogs below</p>
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-md max-w-3xl mx-auto flex flex-col gap-4"
-      >
-        {/* Success Message on top */}
         {successMessage && (
-          <div className="bg-green-100 text-green-800 border border-green-300 px-4 py-3 rounded-lg text-center transition-all duration-500">
+          <div className="bg-green-100 border border-green-300 text-green-700 text-center py-3 px-4 mb-6 rounded-lg animate-fadeIn">
             {successMessage}
           </div>
         )}
 
-        <input
-          type="text"
-          placeholder="Blog Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
-          required
-        />
-
-        <textarea
-          placeholder="Blog Content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="p-3 rounded-lg border border-gray-300 h-48 focus:ring-2 focus:ring-blue-500 outline-none"
-          required
-        />
-
-        <div className="border-2 border-dashed border-gray-400 p-6 rounded-lg text-center cursor-pointer hover:border-blue-500 relative">
-          {imagePreview ? (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="w-full h-60 object-cover rounded-lg mx-auto"
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Title */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Blog Title
+            </label>
+            <input
+              type="text"
+              placeholder="Enter blog title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              required
             />
-          ) : (
-            <p className="text-gray-500">
-              Drag & drop an image here or click to select
-            </p>
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          />
-        </div>
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-        >
-          {loading ? "Saving..." : blog ? "Update Blog" : "Add Blog"}
-        </button>
-      </form>
+          {/* Content */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">
+              Blog Content
+            </label>
+            <textarea
+              placeholder="Write your blog content..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full p-3 rounded-lg border border-gray-300 h-56 focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+              required
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div className="border-2 border-dashed border-gray-300 p-6 rounded-xl text-center hover:border-indigo-500 transition-all duration-300 cursor-pointer relative">
+            {imagePreview ? (
+              <div className="relative group">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-64 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview("");
+                  }}
+                  className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <p className="text-gray-500">
+                Drag & drop an image here or click to select
+              </p>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`py-3 px-6 rounded-lg text-white font-semibold text-lg transition-all ${
+              loading
+                ? "bg-indigo-300 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700 shadow-md"
+            }`}
+          >
+            {loading ? "Saving..." : blog ? "Update Blog" : "Publish Blog"}
+          </button>
+        </form>
+      </div>
+
+      {/* Animation for Success */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+          }
+        `}
+      </style>
     </div>
   );
 }

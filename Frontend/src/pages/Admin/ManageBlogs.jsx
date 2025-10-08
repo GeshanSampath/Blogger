@@ -6,6 +6,7 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 export default function ManageBlogs() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState(null); // for modal
 
   // Fetch pending blogs (SUPER_ADMIN only)
   const fetchPendingBlogs = async () => {
@@ -17,7 +18,6 @@ export default function ManageBlogs() {
       const res = await axios.get(`${API}/blogs/pending`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setBlogs(res.data);
     } catch (err) {
       console.error("Error fetching pending blogs:", err);
@@ -39,7 +39,8 @@ export default function ManageBlogs() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBlogs(blogs.filter(blog => blog.id !== id));
-      alert("Blog approved!");
+      setSelectedBlog(null);
+      alert("✅ Blog approved!");
     } catch (err) {
       console.error("Error approving blog:", err);
       alert("Failed to approve blog");
@@ -54,7 +55,8 @@ export default function ManageBlogs() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBlogs(blogs.filter(blog => blog.id !== id));
-      alert("Blog rejected!");
+      setSelectedBlog(null);
+      alert("❌ Blog rejected!");
     } catch (err) {
       console.error("Error rejecting blog:", err);
       alert("Failed to reject blog");
@@ -66,40 +68,137 @@ export default function ManageBlogs() {
   }, []);
 
   return (
-    <section className="p-8 min-h-screen bg-gray-50 text-gray-900">
-      <h2 className="text-3xl font-bold mb-6 text-indigo-700">Manage Pending Blogs</h2>
+    <section className="p-10 bg-gray-50 min-h-screen text-gray-900">
+      <h2 className="text-4xl font-bold mb-8 text-center text-indigo-700">
+        Manage Pending Blogs
+      </h2>
 
-      {loading && <p className="text-gray-500">Loading...</p>}
-      {!loading && blogs.length === 0 && (
-        <p className="text-gray-500">No pending blogs 🎉</p>
+      {loading && (
+        <p className="text-center text-gray-500 font-medium">Loading...</p>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {blogs.map(blog => (
-          <div key={blog.id} className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transform hover:scale-[1.01] transition-all duration-200">
-            {blog.image && (
-              <img
-                src={`${API}/blogs/images/${blog.image.split("/").pop()}`}
-                alt={blog.title}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-            )}
-            <h3 className="text-lg font-bold mb-2">{blog.title}</h3>
-            <p className="text-sm text-gray-600 mb-3">By <span className="font-medium text-indigo-600">{blog.author?.name}</span></p>
-            <p className="text-gray-700 text-sm line-clamp-3 mb-4">
-              {blog.content ? blog.content.replace(/<[^>]+>/g, "").slice(0, 120) + "..." : "No content available"}
+      {!loading && blogs.length === 0 && (
+        <p className="text-center text-green-600 font-medium">
+          No pending blogs 🎉
+        </p>
+      )}
+
+      {!loading && blogs.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200 rounded-xl shadow-sm">
+            <thead className="bg-indigo-600 text-white">
+              <tr>
+                <th className="px-6 py-3 text-left font-semibold">#</th>
+                <th className="px-6 py-3 text-left font-semibold">Title</th>
+                <th className="px-6 py-3 text-left font-semibold">Author</th>
+                <th className="px-6 py-3 text-center font-semibold">View</th>
+                <th className="px-6 py-3 text-center font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {blogs.map((blog, index) => (
+                <tr
+                  key={blog.id}
+                  className="border-b hover:bg-gray-50 transition-all"
+                >
+                  <td className="px-6 py-4 text-gray-700">{index + 1}</td>
+                  <td className="px-6 py-4 font-semibold text-gray-800">
+                    {blog.title}
+                  </td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {blog.author?.name || "Unknown"}
+                  </td>
+
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => setSelectedBlog(blog)}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg 
+                                 hover:bg-blue-700 transition"
+                    >
+                      View
+                    </button>
+                  </td>
+
+                  <td className="px-6 py-4 text-center space-x-2">
+                    <button
+                      onClick={() => approveBlog(blog.id)}
+                      className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg 
+                                 hover:bg-green-700 transition"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => rejectBlog(blog.id)}
+                      className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg 
+                                 hover:bg-red-700 transition"
+                    >
+                      Reject
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* MODAL */}
+      {selectedBlog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-3xl p-6 rounded-xl shadow-lg relative">
+            <button
+              onClick={() => setSelectedBlog(null)}
+              className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-2xl font-bold text-indigo-700 mb-4">
+              {selectedBlog.title}
+            </h3>
+            <p className="text-gray-500 mb-2">
+              By{" "}
+              <span className="font-medium text-indigo-600">
+                {selectedBlog.author?.name || "Unknown"}
+              </span>
             </p>
 
-            <div className="flex justify-between items-center gap-2">
-              <span className="text-xs text-gray-400">{new Date(blog.createdAt).toLocaleDateString()}</span>
-              <div className="flex gap-2">
-                <button onClick={() => approveBlog(blog.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition">Approve</button>
-                <button onClick={() => rejectBlog(blog.id)} className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition">Reject</button>
-              </div>
+            {selectedBlog.image && (
+              <img
+                src={`${API}/blogs/images/${selectedBlog.image.split("/").pop()}`}
+                alt={selectedBlog.title}
+                className="w-full h-64 object-cover rounded-lg mb-4"
+              />
+            )}
+
+            <div
+              className="text-gray-800 leading-relaxed mb-6 max-h-80 overflow-y-auto"
+              dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => approveBlog(selectedBlog.id)}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => rejectBlog(selectedBlog.id)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
+              >
+                Reject
+              </button>
+              <button
+                onClick={() => setSelectedBlog(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition"
+              >
+                Close
+              </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </section>
   );
 }

@@ -14,6 +14,5 @@ export class Contact {
   @Column()
   message: string;
 
-  @Column()
-  type: String;
+ 
 }

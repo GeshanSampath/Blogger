@@ -16,7 +16,7 @@ export default function Contact() {
     try {
       await axios.post(`${API}/contact`, form);
       setStatus("✅ Message sent successfully!");
-      setForm({ name: "", email: "", message: "",type: "" });
+      setForm({ name: "", email: "", message: ""});
     } catch (err) {
       console.error(err);
       setStatus("❌ Failed to send message. Try again later.");
@@ -100,11 +100,7 @@ export default function Contact() {
             className="w-full px-4 py-3 rounded-lg border border-gray-300/30 bg-white/5 text-white focus:ring-2 focus:ring-[#00adb5] outline-none"
           />
           
-          <input type="text" 
-          placeholder="Type"
-          value={form.type}
-          onChange={(e) => setForm({...form, type: e.target.value })}
-          />
+        
 
 
           <textarea
