@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 // Public pages
 import Navbar from "./components/Navbar";
@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import BlogList from "./pages/Blogs/BlogList";
 import BlogDetails from "./pages/Blogs/BlogDetails";
+import Footer from "./components/Footer";
 
 // Layouts
 import AdminLayout from "./layouts/AdminLayout";
@@ -21,14 +22,20 @@ import ManageBlogs from "./pages/Admin/ManageBlogs";
 
 // Author pages
 import AuthorDashboard from "./pages/Author/AuthorDashboard";
-import Createblog from "./pages/Author/Createblog"; 
+import Createblog from "./pages/Author/Createblog";
 import Myblogs from "./pages/Author/Myblogs";
 
+function AppContent() {
+  const location = useLocation();
 
-function App() {
+  // Hide footer on admin and author routes
+  const hideFooter =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/author");
+
   return (
-    <Router>
-      {/* Global navbar for public pages */}
+    <>
+      {/* Global Navbar (always visible) */}
       <Navbar />
 
       <Routes>
@@ -41,7 +48,7 @@ function App() {
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetails />} />
 
-        {/* Admin routes with layout */}
+        {/* Admin routes */}
         <Route
           path="/admin/dashboard"
           element={
@@ -67,9 +74,8 @@ function App() {
           }
         />
 
-        {/* Author routes with layout */}
-        
-          <Route
+        {/* Author routes */}
+        <Route
           path="/author/authordashboard"
           element={
             <AuthorLayout>
@@ -77,8 +83,6 @@ function App() {
             </AuthorLayout>
           }
         />
-        
-        
         <Route
           path="/author/createblog"
           element={
@@ -96,8 +100,17 @@ function App() {
           }
         />
       </Routes>
-    </Router>
+
+      {/* Footer only on public pages */}
+      {!hideFooter && <Footer />}
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}

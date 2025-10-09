@@ -16,6 +16,36 @@
     background-color: #f9f9f9;
   }
 
+/* Star layers for twinkling effect */
+.stars, .stars2, .stars3 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 
+    1000px 200px #fff, 300px 800px #fff, 900px 100px #fff, 1200px 500px #fff, 
+    400px 900px #fff, 700px 700px #fff, 500px 300px #fff, 1300px 200px #fff;
+  animation: moveStars 100s linear infinite;
+}
+
+.stars2 {
+  box-shadow: 
+    200px 300px #fff, 600px 1000px #fff, 800px 600px #fff, 100px 1200px #fff,
+    1100px 400px #fff, 1300px 900px #fff;
+  animation: moveStars 150s linear infinite;
+}
+
+.stars3 {
+  box-shadow: 
+    500px 1200px #fff, 900px 800px #fff, 1200px 300px #fff, 700px 500px #fff,
+    300px 100px #fff, 1100px 1000px #fff;
+  animation: moveStars 200s linear infinite;
+}
+
+@keyframes moveStars {
+  from { transform: translateY(0); }
+  to { transform: translateY(-2000px); }
+}
 
 
 

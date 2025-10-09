@@ -133,10 +133,7 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#0f1626] py-6 text-center text-gray-400">
-        &copy; {new Date().getFullYear()} Bloger. All rights reserved.
-      </footer>
+     
     </main>
   );
 }

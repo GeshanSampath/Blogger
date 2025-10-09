@@ -66,7 +66,50 @@ export default function Login({ onLogin }) {
       <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-blue-400 rounded-full blur-3xl opacity-40" />
 
       {/* Login Card */}
-      <div className="relative z-10 bg-white w-full max-w-md rounded-2xl shadow-2xl p-10 border border-gray-200">
+      <div className="relative z-10 bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-gray-200">
+        {/* Animated Panda */}
+        <div className="flex justify-center mb-6">
+          <div className="relative">
+            {/* Panda Head */}
+            <div className="w-32 h-32 bg-white rounded-full border-4 border-gray-800 relative">
+              {/* Ears */}
+              <div className="absolute -top-3 -left-3 w-12 h-12 bg-gray-800 rounded-full"></div>
+              <div className="absolute -top-3 -right-3 w-12 h-12 bg-gray-800 rounded-full"></div>
+              
+              {/* Eyes */}
+              <div className="absolute top-8 left-6 w-6 h-6 bg-gray-800 rounded-full"></div>
+              <div className="absolute top-8 right-6 w-6 h-6 bg-gray-800 rounded-full"></div>
+              
+              {/* Eye highlights */}
+              <div className="absolute top-10 left-7 w-2 h-2 bg-white rounded-full"></div>
+              <div className="absolute top-10 right-7 w-2 h-2 bg-white rounded-full"></div>
+              
+              {/* Nose */}
+              <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-4 h-3 bg-gray-800 rounded-full"></div>
+              
+              {/* Mouth - Default straight line */}
+              <div className="absolute top-20 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gray-800 rounded-full"></div>
+              
+              {/* Panda Hands - Animated based on password visibility */}
+              <div 
+                className={`absolute top-10 left-2 w-8 h-5 bg-gray-800 rounded-full transition-all duration-500 ${showPassword ? 'opacity-0' : 'opacity-100'}`}
+                style={{ transform: showPassword ? 'translateX(-10px)' : 'translateX(0)' }}
+              ></div>
+              <div 
+                className={`absolute top-10 right-2 w-8 h-5 bg-gray-800 rounded-full transition-all duration-500 ${showPassword ? 'opacity-0' : 'opacity-100'}`}
+                style={{ transform: showPassword ? 'translateX(10px)' : 'translateX(0)' }}
+              ></div>
+              
+              {/* Smile - Appears when password is visible */}
+              <div 
+                className={`absolute top-20 left-1/2 transform -translate-x-1/2 transition-all duration-500 ${showPassword ? 'w-8 h-3 opacity-100' : 'w-8 h-1 opacity-0'}`}
+              >
+                <div className="w-full h-full border-b-4 border-gray-800 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="text-center mb-6">
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
             Blogger
@@ -105,13 +148,13 @@ export default function Login({ onLogin }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 text-gray-900 transition"
+              className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50 text-gray-900 transition pr-12"
             />
             <span
-              className="absolute right-3 top-[38px] cursor-pointer text-gray-500"
+              className="absolute right-3 top-[38px] cursor-pointer text-gray-500 hover:text-gray-700 transition-colors"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
             </span>
           </div>
 
@@ -144,7 +187,7 @@ export default function Login({ onLogin }) {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <button
             onClick={() => navigate("/signup")}
             className="text-blue-600 font-semibold hover:underline"
