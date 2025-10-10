@@ -14,28 +14,42 @@ import { Roles } from '../auth/roles.decorator';
 import { UserRole } from './users.entity';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPER_ADMIN)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Get authors waiting for approval
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  //  All users except SUPER_ADMIN
+  @Get()
+  getAll() {
+    return this.usersService.findAll();
+  }
+
+  //  Only regular users
+  @Get('only-users')
+  getUsers() {
+    return this.usersService.findOnlyUsers();
+  }
+
+  //  Only authors
+  @Get('only-authors')
+  getAuthors() {
+    return this.usersService.findOnlyAuthors();
+  }
+
+  //  Pending authors
   @Get('pending-authors')
   getPendingAuthors() {
     return this.usersService.findAllAuthorsPendingApproval();
   }
 
-  // Approve author by ID
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  //  Approve author
   @Patch('approve/:id')
   approveAuthor(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.approveAuthor(id);
   }
 
-  // ❌ Reject/Delete author by ID
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  //  Reject author
   @Delete('reject/:id')
   rejectAuthor(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.rejectAuthor(id);

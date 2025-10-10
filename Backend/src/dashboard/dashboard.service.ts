@@ -30,22 +30,5 @@ export class DashboardService {
     return { totalBlogs, activeBlogs, pendingBlogs };
   }
 
-  async getBlogTrends() {
-    try {
-      // Works for MySQL
-      const query = this.blogRepo
-        .createQueryBuilder('blog')
-        .select("DATE_FORMAT(blog.createdAt, '%b %Y')", 'month')
-        .addSelect('COUNT(blog.id)', 'blogs')
-        .groupBy("DATE_FORMAT(blog.createdAt, '%b %Y')")
-        .orderBy('MIN(blog.createdAt)', 'ASC');
-
-      const trends = await query.getRawMany();
-
-      return trends.map((t) => ({ month: t.month, blogs: Number(t.blogs) }));
-    } catch (err) {
-      console.error('Error fetching blog trends:', err);
-      throw err;
-    }
-  }
+ 
 }

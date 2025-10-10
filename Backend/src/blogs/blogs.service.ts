@@ -86,25 +86,7 @@ export class BlogsService {
     return this.blogsRepo.save(blog);
   }
 
-  // Update blog
-  async update(id: number, dto: UpdateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
-    const blog = await this.blogsRepo.findOne({ where: { id }, relations: ['author'] });
-    if (!blog) throw new NotFoundException('Blog not found');
-    if (blog.author.id !== userId) throw new ForbiddenException('Not allowed');
-    if (dto.title) blog.title = dto.title;
-    if (dto.content) blog.content = dto.content;
-    if (imagePath) blog.image = imagePath;
-    return this.blogsRepo.save(blog);
-  }
 
-  // Delete blog
-  async delete(id: number, userId: number): Promise<{ message: string }> {
-    const blog = await this.blogsRepo.findOne({ where: { id }, relations: ['author'] });
-    if (!blog) throw new NotFoundException('Blog not found');
-    if (blog.author.id !== userId) throw new ForbiddenException('Not allowed');
-    await this.blogsRepo.remove(blog);
-    return { message: 'Blog deleted successfully' };
-  }
 
   // Pending blogs
   async findPending(): Promise<Blog[]> {

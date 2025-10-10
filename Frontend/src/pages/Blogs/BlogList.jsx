@@ -1,4 +1,3 @@
-// src/pages/BlogList.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -17,16 +16,17 @@ export default function BlogList() {
 
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get(`${API}/blogs`); // only APPROVED blogs
+      // ✅ Fetch only APPROVED blogs
+      const res = await axios.get(`${API}/blogs`);
       setBlogs(res.data);
     } catch (err) {
       console.error("Error fetching blogs:", err);
     }
   };
 
-  // Handle blog click: increment view once, then navigate
   const handleBlogClick = async (blogId) => {
     try {
+      // ✅ Increment blog view count before navigating
       await axios.patch(`${API}/blogs/${blogId}/increment-view`);
     } catch (err) {
       console.error("Failed to increment view:", err);
@@ -51,22 +51,18 @@ export default function BlogList() {
         {blogs.map((blog) => (
           <motion.div
             key={blog.id}
-            className="bg-white rounded-xl shadow-lg overflow-hidden 
-                      border border-gray-200 hover:shadow-xl 
-                      transform hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+            className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 cursor-pointer"
             whileHover={{ y: -6 }}
-            onClick={() => handleBlogClick(blog.id)} // only here
+            onClick={() => handleBlogClick(blog.id)}
           >
-            {/* Blog Image */}
             {blog.image && (
               <img
                 src={getImageUrl(blog.image)}
                 alt={blog.title}
-                className="w-full h-56 object-cover" 
+                className="w-full h-56 object-cover"
               />
             )}
 
-            {/* Blog Content */}
             <div className="p-5">
               <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
                 {blog.title}

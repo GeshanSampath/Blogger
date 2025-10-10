@@ -5,12 +5,12 @@ import { BlogsService } from './blogs.service';
 import { Blog } from './blog.entity';
 import { User } from '../users/users.entity';
 
-import { AuthModule } from '../auth/auth.module'; // 👈 import AuthModule
+import { AuthModule } from '../auth/auth.module'; // import AuthModule
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Blog, User]),
-    AuthModule, // 👈 provides JwtService for JwtAuthGuard
+    AuthModule, // provides JwtService for JwtAuthGuard
   ],
   controllers: [BlogsController],
   providers: [BlogsService],

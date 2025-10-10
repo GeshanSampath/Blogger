@@ -48,7 +48,7 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 shadow-lg transition-all duration-300 ${
-        scrolled ? "bg-gray-900 text-white shadow-2xl" : "bg-blue-800 text-white"
+        scrolled ? "bg-gray-900 text-white shadow-2xl" : "bg-blue-950 text-white"
       }`}
     >
       <div className="container mx-auto flex justify-between items-center p-4">

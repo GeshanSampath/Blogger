@@ -10,6 +10,7 @@ export default function Sidebar({ role }) {
       { path: "/admin/dashboard", label: "Dashboard" },
       { path: "/admin/pending-authors", label: "Pending Authors" },
       { path: "/admin/manage-blogs", label: "Manage Blogs" },
+       { path: "/admin/users", label: "Users" },
        { path: "/", label: "Home" },
     ],
     author: [
