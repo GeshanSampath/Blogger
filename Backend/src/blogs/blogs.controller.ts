@@ -11,6 +11,7 @@ import {
   BadRequestException,
   ParseIntPipe,
   Res,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -48,13 +49,19 @@ export class BlogsController {
     return this.blogsService.findAll();
   }
 
+  // 🔍 Public: search blogs by keyword (title or content)
+  @Get('search')
+  async searchBlogs(@Query('keyword') keyword: string) {
+    return this.blogsService.searchByKeyword(keyword);
+  }
+
   // Public: trending blogs (top 3 views)
   @Get('trending')
   trending() {
     return this.blogsService.findTopByViews(3);
   }
 
-  // Increment view
+  // Increment view count
   @Patch(':id/increment-view')
   incrementView(@Param('id', ParseIntPipe) id: number) {
     return this.blogsService.incrementViews(id);
@@ -129,7 +136,7 @@ export class BlogsController {
     return this.blogsService.reject(id);
   }
 
-  // Single blog details (PUT LAST)
+  // Single blog (must stay last)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.blogsService.findOne(id);

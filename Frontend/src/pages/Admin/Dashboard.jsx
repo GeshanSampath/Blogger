@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { FaUser, FaUserTie, FaFileAlt, FaClock } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // ✅ Add navigation
 
 export default function Dashboard() {
   const [counts, setCounts] = useState({
@@ -22,7 +23,8 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [adminName, setAdminName] = useState("Admin"); // Replace with auth context if needed
+  const [adminName] = useState("Blogger"); // ✅ Updated to Blogger
+  const navigate = useNavigate(); // ✅ Navigation hook
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -40,8 +42,7 @@ export default function Dashboard() {
           pendingAuthors: usersRes.data.pendingAuthors,
           totalBlogs: blogsRes.data.totalBlogs,
           activeBlogs: blogsRes.data.activeBlogs,
-          pendingBlogs:
-            blogsRes.data.totalBlogs - blogsRes.data.activeBlogs,
+          pendingBlogs: blogsRes.data.totalBlogs - blogsRes.data.activeBlogs,
         });
 
         setLoading(false);
@@ -56,9 +57,7 @@ export default function Dashboard() {
   }, []);
 
   if (loading)
-    return (
-      <p className="text-center mt-10 text-gray-500">Loading...</p>
-    );
+    return <p className="text-center mt-10 text-gray-500">Loading...</p>;
   if (error)
     return <p className="text-center mt-10 text-red-600">{error}</p>;
 
@@ -81,9 +80,14 @@ export default function Dashboard() {
         <h1 className="text-xl md:text-2xl font-bold text-blue-700">
           Welcome to the Admin Panel
         </h1>
-        <span className="text-gray-700 font-semibold text-sm md:text-base">
+
+        {/* ✅ Clickable Blogger name */}
+        <button
+          onClick={() => navigate("/")}
+          className="text-gray-700 font-semibold text-sm md:text-base hover:text-blue-700 transition"
+        >
           {adminName}
-        </span>
+        </button>
       </nav>
 
       {/* Main Content */}

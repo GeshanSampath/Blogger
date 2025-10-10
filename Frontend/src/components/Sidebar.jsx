@@ -8,17 +8,16 @@ export default function Sidebar({ role }) {
   const links = {
     super_admin: [
       { path: "/admin/dashboard", label: "Dashboard" },
-      { path: "/admin/pending-authors", label: "Pending Authors" },
       { path: "/admin/manage-blogs", label: "Manage Blogs" },
        { path: "/admin/users", label: "Users" },
        { path: "/admin/comments", label: "Comments" },
-       { path: "/", label: "Home" },
+       
     ],
     author: [
       { path: "/author/authordashboard", label: "Dashboard" },
       { path: "/author/createblog", label: "Create Blog" },
       { path: "/author/myblogs", label: "My Blogs" }, 
-      { path: "/", label: "Home" }, 
+      
     ],
   };
 

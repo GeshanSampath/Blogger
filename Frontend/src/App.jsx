@@ -17,7 +17,6 @@ import AuthorLayout from "./layouts/AuthorLayout";
 
 // Admin pages
 import Dashboard from "./pages/Admin/Dashboard";
-import PendingAuthors from "./pages/Admin/PendingAuthors";
 import ManageBlogs from "./pages/Admin/ManageBlogs";
 import Users from "./pages/Admin/Users";
 import Comments from "./pages/Admin/Comments";
@@ -59,14 +58,7 @@ function AppContent() {
             </AdminLayout>
           }
         />
-        <Route
-          path="/admin/pending-authors"
-          element={
-            <AdminLayout>
-              <PendingAuthors />
-            </AdminLayout>
-          }
-        />
+      
         <Route
           path="/admin/manage-blogs"
           element={

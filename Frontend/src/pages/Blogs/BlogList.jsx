@@ -9,30 +9,20 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 export default function BlogList() {
   const [blogs, setBlogs] = useState([]);
   const [search, setSearch] = useState("");
-  const [filteredBlogs, setFilteredBlogs] = useState([]);
   const navigate = useNavigate();
 
+  // Fetch blogs when page loads or when search changes
   useEffect(() => {
-    fetchBlogs();
-  }, []);
+    fetchBlogs(search);
+  }, [search]);
 
-  useEffect(() => {
-    if (search.trim() === "") {
-      setFilteredBlogs(blogs);
-    } else {
-      const filtered = blogs.filter((b) =>
-        b.title.toLowerCase().includes(search.toLowerCase()) ||
-        (b.content && b.content.replace(/<[^>]+>/g, "").toLowerCase().includes(search.toLowerCase()))
-      );
-      setFilteredBlogs(filtered);
-    }
-  }, [search, blogs]);
-
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (keyword = "") => {
     try {
-      const res = await axios.get(`${API}/blogs`);
+      const url = keyword
+        ? `${API}/blogs/search?keyword=${keyword}`
+        : `${API}/blogs`;
+      const res = await axios.get(url);
       setBlogs(res.data);
-      setFilteredBlogs(res.data);
     } catch (err) {
       console.error("Error fetching blogs:", err);
     }
@@ -56,7 +46,7 @@ export default function BlogList() {
 
   return (
     <section className="p-6 md:p-10 bg-gradient-to-b from-gray-100 to-gray-50 min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 text-center text-indigo-700">
+      <h1 className="text-4xl font-bold mb-8 text-center text-indigo-700 mt-20">
         Latest Blogs
       </h1>
 
@@ -65,7 +55,7 @@ export default function BlogList() {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
           type="text"
-          placeholder="Search blogs..."
+          placeholder="Search blogs by name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
@@ -73,11 +63,11 @@ export default function BlogList() {
       </div>
 
       {/* Blog Grid */}
-      {filteredBlogs.length === 0 ? (
+      {blogs.length === 0 ? (
         <p className="text-center text-gray-500 mt-10">No blogs found.</p>
       ) : (
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {filteredBlogs.map((blog) => (
+          {blogs.map((blog) => (
             <motion.div
               key={blog.id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-2xl transform hover:scale-[1.03] transition-all duration-300 cursor-pointer"
