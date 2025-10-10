@@ -5,22 +5,25 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from '../users/users.entity';
 import { Comment } from '../comments/comment.entity';
+import { User } from '../users/users.entity';
 
 @Entity()
 export class Reply {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'longtext' })
+  @Column()
   content: string;
-
-  @ManyToOne(() => User, (user) => user.id, { eager: true })
-  user: User;
 
   @ManyToOne(() => Comment, (comment) => comment.replies, { onDelete: 'CASCADE' })
   comment: Comment;
+
+  @ManyToOne(() => User, { eager: true })
+  user: User;
+
+  @Column({ default: false })
+  isApproved: boolean; // ✅ Add this column
 
   @CreateDateColumn()
   createdAt: Date;

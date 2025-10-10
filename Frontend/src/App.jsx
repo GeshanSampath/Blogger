@@ -20,6 +20,7 @@ import Dashboard from "./pages/Admin/Dashboard";
 import PendingAuthors from "./pages/Admin/PendingAuthors";
 import ManageBlogs from "./pages/Admin/ManageBlogs";
 import Users from "./pages/Admin/Users";
+import Comments from "./pages/Admin/Comments";
 
 // Author pages
 import AuthorDashboard from "./pages/Author/AuthorDashboard";
@@ -80,6 +81,15 @@ function AppContent() {
           element={
             <AdminLayout>
               <Users />
+            </AdminLayout>
+          }
+        />
+
+         <Route
+          path="/admin/comments"
+          element={
+            <AdminLayout>
+              <Comments />
             </AdminLayout>
           }
         />

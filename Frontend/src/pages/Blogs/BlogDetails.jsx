@@ -54,7 +54,8 @@ export default function BlogDetails() {
     setCommentsLoading(true);
     try {
       const res = await axios.get(`${API}/blogs/${id}/comments`);
-      setComments(res.data);
+      // ✅ Only show admin-approved comments
+      setComments(res.data.filter((c) => c.isApproved));
     } catch {
       setComments([]);
     } finally {
@@ -147,7 +148,7 @@ export default function BlogDetails() {
                     <p className="text-gray-200">{c.content}</p>
                   </div>
 
-                  {/* Reply button */}
+                  {/* Reply button (only blog author can reply) */}
                   {currentUser && +blog.author.id === +currentUser.id && (
                     <button
                       onClick={() => setReplyBox((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}
@@ -161,9 +162,7 @@ export default function BlogDetails() {
                   {c.replies?.length > 0 && (
                     <div className="mt-2 ml-6">
                       <button
-                        onClick={() =>
-                          setVisibleReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))
-                        }
+                        onClick={() => setVisibleReplies((prev) => ({ ...prev, [c.id]: !prev[c.id] }))}
                         className="text-xs text-pink-400 hover:underline"
                       >
                         {visibleReplies[c.id]
@@ -186,18 +185,13 @@ export default function BlogDetails() {
 
                   {/* Reply Form */}
                   {replyBox[c.id] && (
-                    <form
-                      onSubmit={(e) => postReply(c.id, e)}
-                      className="mt-2 flex gap-2 ml-6"
-                    >
+                    <form onSubmit={(e) => postReply(c.id, e)} className="mt-2 flex gap-2 ml-6">
                       <input
                         type="text"
                         placeholder="Write a reply..."
                         className="flex-1 p-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
                         value={replyContent[c.id] || ""}
-                        onChange={(e) =>
-                          setReplyContent({ ...replyContent, [c.id]: e.target.value })
-                        }
+                        onChange={(e) => setReplyContent({ ...replyContent, [c.id]: e.target.value })}
                       />
                       <button
                         type="submit"

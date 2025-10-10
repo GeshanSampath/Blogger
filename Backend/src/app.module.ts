@@ -6,7 +6,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CommentsModule } from './comments/comments.module';
 import { RepliesModule } from './replies/replies.module';
-import { DashboardModule } from './dashboard/dashboard.module';   
+import { DashboardModule } from './dashboard/dashboard.module';
+import { AdminCommentsModule } from './admincomment/admin-comments.module';   
 
 
 
@@ -29,7 +30,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AuthModule,
     CommentsModule,
     RepliesModule,
-    DashboardModule
+    DashboardModule,
+    AdminCommentsModule
     
   ],
 

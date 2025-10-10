@@ -11,6 +11,7 @@ export default function Sidebar({ role }) {
       { path: "/admin/pending-authors", label: "Pending Authors" },
       { path: "/admin/manage-blogs", label: "Manage Blogs" },
        { path: "/admin/users", label: "Users" },
+       { path: "/admin/comments", label: "Comments" },
        { path: "/", label: "Home" },
     ],
     author: [

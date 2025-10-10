@@ -18,6 +18,9 @@ export class Comment {
   @Column()
   content: string;
 
+  @Column({ default: false })
+  isApproved: boolean; // ✅ New: admin approval flag
+
   @ManyToOne(() => Blog, (blog) => blog.comments, { onDelete: 'CASCADE' })
   blog: Blog;
 
