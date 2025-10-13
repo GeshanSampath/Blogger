@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { FaUser, FaUserTie, FaFileAlt, FaClock } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // ✅ Add navigation
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const [counts, setCounts] = useState({
@@ -23,8 +23,8 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [adminName] = useState("Blogger"); // ✅ Updated to Blogger
-  const navigate = useNavigate(); // ✅ Navigation hook
+  const [adminName] = useState("Blogger");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -81,10 +81,9 @@ export default function Dashboard() {
           Welcome to the Admin Panel
         </h1>
 
-        {/* ✅ Clickable Blogger name */}
         <button
           onClick={() => navigate("/")}
-          className="text-gray-700 font-semibold text-sm md:text-base hover:text-blue-700 transition"
+          className="text-gray-700 font-semibold text-sm md:text-base transition"
         >
           {adminName}
         </button>
@@ -186,7 +185,7 @@ export default function Dashboard() {
 function MetricCard({ title, value, icon, alert }) {
   return (
     <div
-      className={`bg-white shadow-lg rounded-lg p-4 md:p-6 w-[150px] md:w-[200px] text-center flex flex-col items-center justify-center space-y-1 md:space-y-2 transition hover:scale-105 ${
+      className={`bg-white shadow-lg rounded-lg p-4 md:p-6 w-[150px] md:w-[200px] text-center flex flex-col items-center justify-center space-y-1 md:space-y-2 ${
         alert ? "border-2 border-red-400" : ""
       }`}
     >
@@ -208,7 +207,7 @@ function MetricCard({ title, value, icon, alert }) {
 // Chart Card Wrapper
 function ChartCard({ title, children }) {
   return (
-    <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg hover:shadow-2xl transition w-full md:w-[48%]">
+    <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full md:w-[48%]">
       <h2 className="text-lg md:text-xl font-semibold mb-4 text-center md:text-left">
         {title}
       </h2>
