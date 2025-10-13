@@ -30,6 +30,10 @@ export class User {
   @Column({ default: false })
   isApproved: boolean;
 
+
+
+  @Column({ nullable: true })
+  avatar?: string;
   
 
   @OneToMany(() => Blog, (blog) => blog.author)

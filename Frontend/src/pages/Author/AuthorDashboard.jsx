@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts";
-import { FaCheckCircle, FaClock, FaFileAlt } from "react-icons/fa";
+import { FaCheckCircle, FaClock, FaFileAlt, FaEnvelope, FaUser } from "react-icons/fa";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -13,7 +13,11 @@ export default function AuthorDashboard() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [authorName, setAuthorName] = useState("Author");
+  const [author, setAuthor] = useState({
+    name: "Author",
+    email: "",
+    avatar: "",
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -26,7 +30,11 @@ export default function AuthorDashboard() {
         });
 
         const data = res.data;
-        setAuthorName(data.authorName || "Author");
+        setAuthor({
+          name: data.authorName || "Author",
+          email: data.authorEmail || "No email available",
+          avatar: data.authorAvatar || "", // if your API provides avatar
+        });
 
         setCounts({
           totalBlogs: data.total,
@@ -61,11 +69,36 @@ export default function AuthorDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Top Navbar */}
       <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-indigo-600">Welcome, {authorName}</h1>
+        <h1 className="text-2xl font-bold text-indigo-600">
+          Welcome, {author.name}
+        </h1>
       </nav>
 
       {/* Main Content */}
       <div className="p-10 space-y-10">
+        {/* Author Profile Card */}
+        <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col sm:flex-row items-center sm:items-start sm:space-x-6 space-y-4 sm:space-y-0 hover:shadow-2xl transition">
+          {author.avatar ? (
+            <img
+              src={author.avatar}
+              alt="Author Avatar"
+              className="w-24 h-24 rounded-full border-2 border-indigo-500 object-cover"
+            />
+          ) : (
+            <div className="w-24 h-24 flex items-center justify-center bg-indigo-100 rounded-full border-2 border-indigo-300">
+              <FaUser className="text-indigo-500 text-3xl" />
+            </div>
+          )}
+          <div className="text-center sm:text-left">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 justify-center sm:justify-start">
+              <FaUser className="text-indigo-500" /> {author.name}
+            </h2>
+            <p className="text-gray-600 flex items-center gap-2 justify-center sm:justify-start mt-1">
+              <FaEnvelope className="text-gray-500" /> {author.email}
+            </p>
+          </div>
+        </div>
+
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <MetricCard

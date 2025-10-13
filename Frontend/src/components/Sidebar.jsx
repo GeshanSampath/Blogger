@@ -14,8 +14,7 @@ export default function Sidebar({ role }) {
        
     ],
     author: [
-      { path: "/author/authordashboard", label: "Dashboard" },
-      { path: "/author/createblog", label: "Create Blog" },
+      { path: "/author/authordashboard", label: "Profile" },
       { path: "/author/myblogs", label: "My Blogs" }, 
       
     ],
@@ -26,7 +25,7 @@ export default function Sidebar({ role }) {
   return (
     <div className="w-64 h-screen bg-gray-800 text-white p-5 flex flex-col">
       <h2 className="text-2xl font-bold mb-6 border-b border-gray-700 pb-3">
-        {role === "super_admin" ? "Admin Panel" : "Author Panel"}
+        {role === "super_admin" ? "Admin Panel" : "Profile"}
       </h2>
 
       <ul className="flex-1 space-y-3">

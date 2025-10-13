@@ -23,7 +23,6 @@ import Comments from "./pages/Admin/Comments";
 
 // Author pages
 import AuthorDashboard from "./pages/Author/AuthorDashboard";
-import Createblog from "./pages/Author/Createblog";
 import Myblogs from "./pages/Author/Myblogs";
 
 function AppContent() {
@@ -95,14 +94,8 @@ function AppContent() {
             </AuthorLayout>
           }
         />
-        <Route
-          path="/author/createblog"
-          element={
-            <AuthorLayout>
-              <Createblog />
-            </AuthorLayout>
-          }
-        />
+        
+        
         <Route
           path="/author/myblogs"
           element={

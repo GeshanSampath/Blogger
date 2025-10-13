@@ -43,20 +43,35 @@ export default function Login({ onLogin }) {
     if (!validate()) return;
 
     setLoading(true);
-    try {
-      const res = await axios.post(`${API}/auth/login`, { email, password });
+   try {
+  const res = await axios.post(`${API}/auth/login`, { email, password });
 
-      localStorage.setItem("token", res.data.accessToken);
-      localStorage.setItem("role", res.data.role);
+  // Save token and role
+  const role = res.data.role.toLowerCase();
+  localStorage.setItem("token", res.data.accessToken);
+  localStorage.setItem("role", role);
 
-      if (onLogin) onLogin();
-      navigate("/", { replace: true });
-      window.location.reload();
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
+  if (onLogin) onLogin();
+
+  // Role-based navigation
+  if (role === "super_admin") {
+    navigate("/admin/dashboard", { replace: true });
+  } else if (role === "author") {
+    navigate("/author/authordashboard", { replace: true });
+  } else {
+    navigate("/", { replace: true });
+  }
+
+  window.location.reload()
+
+  // Optional: reload if needed
+  // window.location.reload();
+
+} catch (err) {
+  setError(err.response?.data?.message || "Login failed");
+} finally {
+  setLoading(false);
+}
   };
 
   return (

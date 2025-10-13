@@ -80,29 +80,44 @@ export class BlogsService {
     });
   }
 
-  // Author stats
-  async getAuthorBlogStats(userId: number) {
-    const author = await this.usersRepo.findOne({ where: { id: userId } });
-    if (!author) throw new NotFoundException('Author not found');
+  // ✅ Author stats (updated to include email + avatar)
+async getAuthorBlogStats(userId: number) {
+  const author = await this.usersRepo.findOne({ where: { id: userId } });
+  if (!author) throw new NotFoundException('Author not found');
 
-    const [total, approved, rejected, pending] = await Promise.all([
-      this.blogsRepo.count({ where: { author: { id: userId } } }),
-      this.blogsRepo.count({
-        where: { author: { id: userId }, status: BlogStatus.APPROVED },
-      }),
-      this.blogsRepo.count({
-        where: { author: { id: userId }, status: BlogStatus.REJECTED },
-      }),
-      this.blogsRepo.count({
-        where: { author: { id: userId }, status: BlogStatus.PENDING },
-      }),
-    ]);
+  const [total, approved, rejected, pending] = await Promise.all([
+    this.blogsRepo.count({ where: { author: { id: userId } } }),
+    this.blogsRepo.count({
+      where: { author: { id: userId }, status: BlogStatus.APPROVED },
+    }),
+    this.blogsRepo.count({
+      where: { author: { id: userId }, status: BlogStatus.REJECTED },
+    }),
+    this.blogsRepo.count({
+      where: { author: { id: userId }, status: BlogStatus.PENDING },
+    }),
+  ]);
 
-    return { authorName: author.name, total, approved, rejected, pending };
+  return {
+    authorName: author.name,
+    authorEmail: author.email,       // ✅ added email
+    authorAvatar: author.avatar || null, // ✅ if you have avatar field in User
+    total,
+    approved,
+    rejected,
+    pending,
+  };
+
+
+  
   }
 
   // Create blog
-  async create(dto: CreateBlogDto, userId: number, imagePath?: string): Promise<Blog> {
+  async create(
+    dto: CreateBlogDto,
+    userId: number,
+    imagePath?: string,
+  ): Promise<Blog> {
     const blog = this.blogsRepo.create({
       ...dto,
       image: imagePath,
