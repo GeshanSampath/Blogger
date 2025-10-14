@@ -173,15 +173,14 @@ export default function Login({ onLogin }) {
             </span>
           </div>
 
-          {/* Forgot Password placeholder */}
-          <div className="text-right">
-            <button
-              type="button"
-              onClick={() => alert("Forgot password flow here")}
-              className="text-sm text-blue-500 hover:underline font-medium"
-            >
-              Forgot Password?
-            </button>
+         <div className="text-right">
+          <button
+            type="button"
+             onClick={() => navigate("/pages/reset-password")}
+             className="text-sm text-blue-500 hover:underline font-medium"
+             >
+            Forgot Password?
+          </button>
           </div>
 
           <button

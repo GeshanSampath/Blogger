@@ -1,8 +1,7 @@
-// src/users/users.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Blog } from '../blogs/blog.entity';
 import { Reply } from '../replies/reply.entity';
-import { Comment } from '../comments/comment.entity'; // 🔹 You forgot this import
+import { Comment } from '../comments/comment.entity';
 
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
@@ -30,11 +29,8 @@ export class User {
   @Column({ default: false })
   isApproved: boolean;
 
-
-
   @Column({ nullable: true })
   avatar?: string;
-  
 
   @OneToMany(() => Blog, (blog) => blog.author)
   blogs: Blog[];
@@ -42,7 +38,8 @@ export class User {
   @OneToMany(() => Reply, (reply) => reply.user)
   replies: Reply[];
 
- 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
+
+
 }

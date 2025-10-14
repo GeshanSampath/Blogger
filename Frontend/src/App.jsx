@@ -10,6 +10,7 @@ import Signup from "./pages/Signup";
 import BlogList from "./pages/Blogs/BlogList";
 import BlogDetails from "./pages/Blogs/BlogDetails";
 import Footer from "./components/Footer";
+import ResetPassword from "./pages/ResetPassword";
 
 // Layouts
 import AdminLayout from "./layouts/AdminLayout";
@@ -47,6 +48,7 @@ function AppContent() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/blogs" element={<BlogList />} />
         <Route path="/blogs/:id" element={<BlogDetails />} />
+        <Route path="/pages/reset-password" element={<ResetPassword />} />
 
         {/* Admin routes */}
         <Route
