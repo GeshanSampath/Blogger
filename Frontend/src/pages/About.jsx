@@ -1,75 +1,99 @@
-export default function About() {
+import { Users, Target, Lightbulb, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
+
+export default function AboutUs() {
   return (
-    <main className="bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white py-20 px-6 text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-4">About Me</h1>
-        <p className="text-lg md:text-xl max-w-2xl mx-auto">
-          Sharing <span className="text-[#00adb5]">stories</span>,{" "}
-          <span className="text-[#00adb5]">knowledge</span>, and{" "}
-          <span className="text-[#00adb5]">creativity</span> with the world.
-        </p>
-      </section>
-
-      {/* Main About Content */}
-      <section className="max-w-5xl mx-auto py-16 px-6 text-center">
-        <h2 className="text-3xl font-bold text-[#1a1a2e] mb-6">
-          My Blogging Journey
-        </h2>
-        <p className="text-lg text-gray-700 leading-relaxed max-w-3xl mx-auto mb-10">
-          Hello! I’m a passionate blogger who loves writing about technology,
-          design, and lifestyle. This blog started as a small journal, but
-          quickly grew into a platform where I can share my ideas, tutorials,
-          and experiences with people around the globe.
-        </p>
-
-        {/* Mission & Vision Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-            <h3 className="text-2xl font-semibold text-[#0f3460] mb-3">
-              🌟 Mission
-            </h3>
-            <p className="text-gray-600">
-              To inspire and educate readers by sharing authentic content,
-              creative tutorials, and insightful stories.
-            </p>
-          </div>
-          <div className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-            <h3 className="text-2xl font-semibold text-[#0f3460] mb-3">
-              🚀 Vision
-            </h3>
-            <p className="text-gray-600">
-              To build a community of curious minds who learn, grow, and create
-              together through blogging.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Author Section */}
-      <section className="bg-[#f8f9fa] py-16 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <img
-            src="https://i.pravatar.cc/150?img=12"
-            alt="Author"
-            className="w-32 h-32 mx-auto rounded-full border-4 border-[#00adb5] shadow-md mb-6"
-          />
-          <h3 className="text-2xl font-bold text-[#1a1a2e] mb-2">
-            Hi, I’m Geshan 👋
-          </h3>
-          <p className="text-gray-700 mb-4">
-            A blogger, developer, and designer who loves sharing knowledge and
-            building digital experiences.
+      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl font-bold mb-6">About Our Blog</h1>
+          <p className="text-xl text-blue-100">
+            Sharing insights, stories, and knowledge to inspire and educate our community
           </p>
-
-          {/* Social Links */}
-          <div className="flex justify-center gap-6 text-[#00adb5] text-xl">
-            <a href="#" className="hover:text-[#08c4cc]">🐦 Twitter</a>
-            <a href="#" className="hover:text-[#08c4cc]">💼 LinkedIn</a>
-            <a href="#" className="hover:text-[#08c4cc]">📸 Instagram</a>
-          </div>
         </div>
       </section>
-    </main>
+
+      {/* Main Content */}
+      <section className="max-w-4xl mx-auto px-4 py-16">
+        {/* Our Story */}
+        <div className="mb-16">
+          <h2 className="text-4xl font-bold text-slate-900 mb-6">Our Story</h2>
+          <p className="text-lg text-slate-700 mb-4">
+            Welcome to our blog! We started this platform with a simple mission: to create a space where ideas flow freely and knowledge is shared openly. What began as a passion project has grown into a vibrant community of readers and thinkers.
+          </p>
+          <p className="text-lg text-slate-700">
+            We believe that great writing has the power to inform, inspire, and transform. Whether you're here to learn something new, find different perspectives, or simply enjoy engaging content, we're thrilled to have you as part of our journey.
+          </p>
+        </div>
+
+        {/* Core Values */}
+        <div className="mb-16">
+          <h2 className="text-4xl font-bold text-slate-900 mb-12">Our Values</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Repeat for each value card */}
+            <div className="bg-white p-8 rounded-lg shadow-md border-l-4 border-blue-600">
+              <div className="flex items-start gap-4">
+                <Target className="w-8 h-8 text-blue-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Quality Content</h3>
+                  <p className="text-slate-700">
+                    We're committed to publishing thoughtful, well-researched articles that provide real value to our readers.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-8 rounded-lg shadow-md border-l-4 border-purple-600">
+              <div className="flex items-start gap-4">
+                <Lightbulb className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Innovation</h3>
+                  <p className="text-slate-700">
+                    We explore fresh ideas and perspectives, always looking to push boundaries and think differently.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-8 rounded-lg shadow-md border-l-4 border-green-600">
+              <div className="flex items-start gap-4">
+                <Users className="w-8 h-8 text-green-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Community</h3>
+                  <p className="text-slate-700">
+                    We foster an inclusive community where diverse voices are heard, valued, and celebrated.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-8 rounded-lg shadow-md border-l-4 border-orange-600">
+              <div className="flex items-start gap-4">
+                <Mail className="w-8 h-8 text-orange-600 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">Transparency</h3>
+                  <p className="text-slate-700">
+                    We believe in honest communication and genuine connection with our readers.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="bg-blue-600 text-white rounded-lg p-12 text-center">
+          <h2 className="text-3xl font-bold mb-4">Get In Touch</h2>
+          <p className="text-lg text-blue-100 mb-6">
+            Have a question or want to collaborate? We'd love to hear from you!
+          </p>
+          {/* Link to Contact page */}
+          <Link
+            to="/contact"
+            className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-blue-50 transition"
+          >
+            Contact Us
+          </Link>
+        </div>
+      </section>
+    </div>
   );
 }

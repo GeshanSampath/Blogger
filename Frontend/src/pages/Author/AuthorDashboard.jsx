@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts";
-import { FaCheckCircle, FaClock, FaFileAlt, FaEnvelope, FaUser } from "react-icons/fa";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+import {
+  FaCheckCircle,
+  FaClock,
+  FaFileAlt,
+  FaEnvelope,
+  FaUser,
+} from "react-icons/fa";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -16,7 +29,6 @@ export default function AuthorDashboard() {
   const [author, setAuthor] = useState({
     name: "Author",
     email: "",
-    avatar: "",
   });
 
   useEffect(() => {
@@ -33,7 +45,6 @@ export default function AuthorDashboard() {
         setAuthor({
           name: data.authorName || "Author",
           email: data.authorEmail || "No email available",
-          avatar: data.authorAvatar || "", // if your API provides avatar
         });
 
         setCounts({
@@ -76,31 +87,20 @@ export default function AuthorDashboard() {
 
       {/* Main Content */}
       <div className="p-10 space-y-10">
-        {/* Author Profile Card */}
-        <div className="bg-white shadow-lg rounded-lg p-6 flex flex-col sm:flex-row items-center sm:items-start sm:space-x-6 space-y-4 sm:space-y-0 hover:shadow-2xl transition">
-          {author.avatar ? (
-            <img
-              src={author.avatar}
-              alt="Author Avatar"
-              className="w-24 h-24 rounded-full border-2 border-indigo-500 object-cover"
-            />
-          ) : (
-            <div className="w-24 h-24 flex items-center justify-center bg-indigo-100 rounded-full border-2 border-indigo-300">
-              <FaUser className="text-indigo-500 text-3xl" />
-            </div>
-          )}
-          <div className="text-center sm:text-left">
-            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 justify-center sm:justify-start">
-              <FaUser className="text-indigo-500" /> {author.name}
+        {/* 4 Cards Row (Author + 3 Metric Cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Author Info Card */}
+          <div className="bg-white shadow-md rounded-lg p-6 flex flex-col items-center justify-center text-center">
+            <FaUser className="text-4xl text-indigo-500 mb-2" />
+            <h2 className="text-xl font-semibold text-gray-800">
+              {author.name}
             </h2>
-            <p className="text-gray-600 flex items-center gap-2 justify-center sm:justify-start mt-1">
+            <p className="text-gray-600 flex items-center gap-2 mt-1 justify-center">
               <FaEnvelope className="text-gray-500" /> {author.email}
             </p>
           </div>
-        </div>
 
-        {/* Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Metric Cards */}
           <MetricCard
             title="Total Blogs"
             value={counts.totalBlogs}
@@ -120,7 +120,7 @@ export default function AuthorDashboard() {
         </div>
 
         {/* Pie Chart */}
-        <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition">
+        <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Blog Status</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -152,7 +152,7 @@ export default function AuthorDashboard() {
 function MetricCard({ title, value, icon, alert }) {
   return (
     <div
-      className={`bg-white shadow-lg rounded-lg p-6 text-center flex flex-col items-center justify-center space-y-2 transition hover:scale-105 ${
+      className={`bg-white shadow-md rounded-lg p-6 text-center flex flex-col items-center justify-center space-y-2 ${
         alert ? "border-2 border-yellow-400" : ""
       }`}
     >

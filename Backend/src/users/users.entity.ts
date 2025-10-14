@@ -42,7 +42,7 @@ export class User {
   @OneToMany(() => Reply, (reply) => reply.user)
   replies: Reply[];
 
-  // ✅ Now this compiles cleanly because Comment is properly imported
+ 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
 }

@@ -80,7 +80,7 @@ export class BlogsService {
     });
   }
 
-  // ✅ Author stats (updated to include email + avatar)
+
 async getAuthorBlogStats(userId: number) {
   const author = await this.usersRepo.findOne({ where: { id: userId } });
   if (!author) throw new NotFoundException('Author not found');
@@ -100,8 +100,8 @@ async getAuthorBlogStats(userId: number) {
 
   return {
     authorName: author.name,
-    authorEmail: author.email,       // ✅ added email
-    authorAvatar: author.avatar || null, // ✅ if you have avatar field in User
+    authorEmail: author.email,      
+    authorAvatar: author.avatar || null, 
     total,
     approved,
     rejected,
