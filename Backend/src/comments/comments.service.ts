@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Comment } from './comment.entity';
@@ -24,7 +24,7 @@ export class CommentsService {
     private userRepository: Repository<User>,
   ) {}
 
-  // Get all approved comments with approved replies
+  // Get all approved comments with all replies
   async getCommentsWithReplies(blogId: number): Promise<Comment[]> {
     const comments = await this.commentRepository.find({
       where: { blog: { id: blogId }, isApproved: true },
@@ -32,11 +32,7 @@ export class CommentsService {
       order: { createdAt: 'ASC' },
     });
 
-    // Only include approved replies
-    comments.forEach((comment) => {
-      comment.replies = comment.replies.filter((r) => r.isApproved);
-    });
-
+    // Replies are no longer filtered by approval
     return comments;
   }
 
@@ -50,9 +46,15 @@ export class CommentsService {
     return blog.author.id === userId;
   }
 
-  // Create new comment (pending approval)
-  async createComment(blogId: number, userId: number, dto: CreateCommentDto): Promise<Comment> {
-    const blog = await this.blogRepository.findOne({ where: { id: blogId, status: BlogStatus.APPROVED } });
+  // Create new comment (pending admin approval)
+  async createComment(
+    blogId: number,
+    userId: number,
+    dto: CreateCommentDto,
+  ): Promise<Comment> {
+    const blog = await this.blogRepository.findOne({
+      where: { id: blogId, status: BlogStatus.APPROVED },
+    });
     if (!blog) throw new NotFoundException('Blog not found');
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -68,9 +70,16 @@ export class CommentsService {
     return this.commentRepository.save(comment);
   }
 
-  // Create reply to comment (pending approval)
-  async createReply(commentId: number, userId: number, dto: CreateReplyDto): Promise<Reply> {
-    const comment = await this.commentRepository.findOne({ where: { id: commentId } });
+  // Create reply to comment (no approval required)
+  async createReply(
+    commentId: number,
+    userId: number,
+    dto: CreateReplyDto,
+  ): Promise<Reply> {
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId },
+      relations: ['blog', 'user'],
+    });
     if (!comment) throw new NotFoundException('Comment not found');
 
     const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -80,7 +89,6 @@ export class CommentsService {
       content: dto.content,
       comment,
       user,
-      isApproved: false, // Needs admin approval
     });
 
     return this.replyRepository.save(reply);
@@ -94,15 +102,7 @@ export class CommentsService {
     return this.commentRepository.save(comment);
   }
 
-  // Admin: approve reply
-  async approveReply(id: number): Promise<Reply> {
-    const reply = await this.replyRepository.findOne({ where: { id } });
-    if (!reply) throw new NotFoundException('Reply not found');
-    reply.isApproved = true;
-    return this.replyRepository.save(reply);
-  }
-
-  // Optional: delete comment (admin)
+  // Delete comment
   async deleteComment(id: number): Promise<{ message: string }> {
     const comment = await this.commentRepository.findOne({ where: { id } });
     if (!comment) throw new NotFoundException('Comment not found');
@@ -110,11 +110,5 @@ export class CommentsService {
     return { message: 'Comment deleted successfully' };
   }
 
-  // Optional: delete reply (admin)
-  async deleteReply(id: number): Promise<{ message: string }> {
-    const reply = await this.replyRepository.findOne({ where: { id } });
-    if (!reply) throw new NotFoundException('Reply not found');
-    await this.replyRepository.remove(reply);
-    return { message: 'Reply deleted successfully' };
-  }
+
 }

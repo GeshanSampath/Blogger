@@ -16,5 +16,8 @@ export class DashboardController {
     return this.dashboardService.getBlogsCount();
   }
 
- 
+  @Get('pending-comments-count')
+  getPendingCommentsCount() {
+    return this.dashboardService.getPendingCommentsCount();
+  }
 }

@@ -4,14 +4,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../users/users.entity';
 import { Blog, BlogStatus } from '../blogs/blog.entity';
+import { Comment } from '../comments/comment.entity'; // import Comment entity
 
 @Injectable()
 export class DashboardService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+
     @InjectRepository(Blog)
     private readonly blogRepo: Repository<Blog>,
+
+    @InjectRepository(Comment)
+    private readonly commentRepo: Repository<Comment>, // inject Comment repository
   ) {}
 
   async getUsersCount() {
@@ -30,5 +35,8 @@ export class DashboardService {
     return { totalBlogs, activeBlogs, pendingBlogs };
   }
 
- 
+  async getPendingCommentsCount() {
+    const pendingComments = await this.commentRepo.count({ where: { isApproved: false } });
+    return { pendingComments };
+  }
 }

@@ -27,7 +27,7 @@ interface AuthRequest extends Request {
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  // ✅ Get only approved comments with approved replies
+  // ✅ Get only approved comments with replies
   @Get()
   async getComments(@Param('blogId') blogId: string) {
     return this.commentsService.getCommentsWithReplies(+blogId);
@@ -45,7 +45,7 @@ export class CommentsController {
     return this.commentsService.createComment(+blogId, req.user.id, dto);
   }
 
-  // ✅ Create reply (only blog author) - pending approval
+  // ✅ Create reply (only blog author) — no approval needed
   @UseGuards(JwtAuthGuard)
   @Post(':commentId/replies')
   async createReply(
@@ -73,14 +73,6 @@ export class CommentsController {
     return this.commentsService.approveComment(+commentId);
   }
 
-  // ✅ Admin approves a reply
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN)
-  @Patch('replies/approve/:replyId')
-  async approveReply(@Param('replyId') replyId: string) {
-    return this.commentsService.approveReply(+replyId);
-  }
-
   // ✅ Admin deletes a comment
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
@@ -89,11 +81,5 @@ export class CommentsController {
     return this.commentsService.deleteComment(+commentId);
   }
 
-  // ✅ Admin deletes a reply
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN)
-  @Delete('replies/:replyId')
-  async deleteReply(@Param('replyId') replyId: string) {
-    return this.commentsService.deleteReply(+replyId);
-  }
+
 }

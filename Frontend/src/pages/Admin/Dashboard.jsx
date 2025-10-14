@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { FaUser, FaUserTie, FaFileAlt, FaClock } from "react-icons/fa";
+import { FaUser, FaUserTie, FaFileAlt, FaClock, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -19,6 +19,7 @@ export default function Dashboard() {
     totalBlogs: 0,
     activeBlogs: 0,
     pendingBlogs: 0,
+    pendingComments: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -35,6 +36,9 @@ export default function Dashboard() {
         const blogsRes = await axios.get(
           "http://localhost:3000/dashboard/blogs-count"
         );
+        const commentsRes = await axios.get(
+          "http://localhost:3000/dashboard/pending-comments-count"
+        );
 
         setCounts({
           users: usersRes.data.users,
@@ -43,6 +47,7 @@ export default function Dashboard() {
           totalBlogs: blogsRes.data.totalBlogs,
           activeBlogs: blogsRes.data.activeBlogs,
           pendingBlogs: blogsRes.data.totalBlogs - blogsRes.data.activeBlogs,
+          pendingComments: commentsRes.data.pendingComments,
         });
 
         setLoading(false);
@@ -115,6 +120,12 @@ export default function Dashboard() {
             value={counts.pendingBlogs}
             icon={<FaClock />}
             alert={counts.pendingBlogs > 0}
+          />
+          <MetricCard
+            title="Pending Comments"
+            value={counts.pendingComments}
+            icon={<FaComment />}
+            alert={counts.pendingComments > 0}
           />
         </div>
 
