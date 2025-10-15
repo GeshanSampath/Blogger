@@ -23,7 +23,7 @@ export class Reply {
   user: User;
 
   @Column({ default: false })
-  isApproved: boolean; // ✅ Add this column
+  isApproved: boolean; 
 
   @CreateDateColumn()
   createdAt: Date;

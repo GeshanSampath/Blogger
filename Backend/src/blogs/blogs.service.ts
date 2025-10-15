@@ -21,7 +21,7 @@ export class BlogsService {
     });
   }
 
-  // 🔍 Search blogs by keyword (title or content)
+  // Search blogs by keyword (title or content)
   async searchByKeyword(keyword: string): Promise<Blog[]> {
     if (!keyword || keyword.trim() === '') {
       return this.findAll();
